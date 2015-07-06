@@ -1,0 +1,7 @@
+=== How to Compile
+Edit make.inc
+% make
+
+=== How to run
+Edit input.dat
+% ./opt
