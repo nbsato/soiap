@@ -1,0 +1,34 @@
+converttool/change_parms.py parms.f90 > parms_o.f90
+
+converttool/extract_parms.py parms.f90
+['natom', 'nloopa', 'nloopc', 'loopa', 'loopc', 'imd', 'imdc', 'isd_cell', 'nkatm', 'ifrcf', 'iamax', 'uv', 'uvo', 'vuv', 'bv', 'omega', 'omegai', 'mconv', 'tote', 'toter0', 'strs', 'strso', 'extstrs', 'fth', 'fmax', 'sth', 'smax', 'tstep', 'mcell', 'guv', 'sdv_cell', 'duv0', 'lambda_cell', 'alphalm', 'iposfix', 'zatm', 'katm', 'ra', 'rr', 'rro', 'mass', 'mfac', 'frc', 'vrr', 'lgdiis', 'iuphess', 'igdiis', 'imod', 'imod0', 'imod2', 'imdgdiis', 'rah', 'gradh', 'hessi2', 'dampmu']
+とでる。これらをchp.py wlist=に書き込む。
+
+$ converttool/chp.py  atomrelax_qmas.f > atomrelax_qmas_o.f
+$ converttool/chp.py  opt2.f90 > opt2_o.f90
+will change fortran code.
+
+
+object oriented files
+parms_o.f90 atomrelax_qmas_o.f opt2_o.f90 
+をつかうようにmakefileを書き換える
+
+
+compileすると
+opt2_modify.f90(20): error #5082: 構文エラー、'%' が見つかりました、 ( = の 1 つを指定してください。
+  do QMD%loopc=1,QMD%nloopc ! relax unit vectors
+というエラーが出る。do のcounterにはtype変数は使えないという制約のせい。
+
+しかたないので
+変数定義に
+  integer:: loopa,loopc
+
+  do loopc=1,QMD%nloopc ! relax unit vectors
+     QMD%loopc=loopc
+と書き換える。
+
+     do QMD%loopa=1,QMD%nloopa ! relax internal coordinates
+も同じく書き換える。
+     do loopa=1,QMD%nloopa ! relax internal coordinates
+        QMD%loopa=loopa
+

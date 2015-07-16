@@ -1,0 +1,12 @@
+
+step1
+$gawk -f step1.awk opt.f90 > opt2.f90
+
+step2
+add time directives
+
+step3
+change frac_diff_min
+
+step4
+add openmp directive 
