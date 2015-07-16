@@ -1,6 +1,6 @@
 
 step1
-$gawk -f step1.awk opt.f90 > opt2.f90
+$gawk -f converttool/step1.awk opt.f90 > opt2.f90
 
 step2
 add time directives

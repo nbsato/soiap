@@ -22,11 +22,16 @@ program main
      QMD%loopc=loopc
      if (QMD%loopc>1) then 
         call updt_cell
+        write(901,*)'QMD%tote=',QMD%tote
+        write(6,*)'QMD%uv(ang)='
+        write(6,'(3F20.10)') QMD%uv*bohr
      endif   
      call output_struc(901)
 
      do loopa=1,QMD%nloopa ! relax internal coordinates
 	QMD%loopa=loopa
+        write(6,*)'QMD%loopc,QMD%loopa=',QMD%loopc,QMD%loopa,' of ',QMD%nloopc,QMD%nloopa
+
         call updt_coord
 !#TIME0
         call tote_frc_strs
@@ -270,7 +275,7 @@ subroutine tote_frc_strs
      endif
   enddo
 
-  write(*,'(a,10F20.10)')'tote,fmax,tote/natom,omega,omega/natom =',&
+  write(*,'(a,10F20.10)')'tote,fmax,tote/natom,omega,omega/natom=',&
 QMD%tote,QMD%fmax,&
 QMD%tote/QMD%natom,QMD%omega*((bohr)**3),QMD%omega*(bohr**3)/QMD%natom 
 

@@ -4,4 +4,4 @@ Edit make.inc
 
 === How to run
 Edit input.dat
-% ./opt
+% ./opt2_o 

@@ -1,9 +1,18 @@
 compiler: ifort -O2 -g -traceback -mkl 
 
+number_atom 512
+number_element 1
+unit_vec
+( 21.724 0.0 0.0 )
+( 0.0 21.724 0.0 )
+( 0.0 0.0 21.724 )
+
 opt     1 smp 29.553 sec
 
 opt2    1 smp 3.82 sec
         4core/8smp 0.97 sec
+
+hyperthreading is effective.
 
 
 --------------------------
