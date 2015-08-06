@@ -351,7 +351,8 @@ subroutine Stillinger_Weber
   QMD%frc=frc2+frc3
 ! debug
 !  QMD%strs=strs2+strs3
-  QMD%strs=strs2-strs3
+!  QMD%strs=strs2-strs3
+  QMD%strs=(strs2-strs3)/QMD%omega
 
 !write(6,*)'debug,tote2,frc2,strs2=',tote2,sum(frc2),strs2
 !write(6,*)'debug,tote3,frc3,strs3=',tote3,sum(frc3),strs3
