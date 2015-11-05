@@ -1,0 +1,10 @@
+ tstep
+   200.000000000000     
+ igdiis
+           0
+ lattice_mass
+  3.000000000000000E-004
+ md_gdiis
+           0
+ damping_factor
+  0.000000000000000E+000

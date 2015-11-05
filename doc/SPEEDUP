@@ -1,0 +1,72 @@
+compiler: ifort -O2 -g -traceback -mkl 
+
+number_atom 512
+number_element 1
+unit_vec
+( 21.724 0.0 0.0 )
+( 0.0 21.724 0.0 )
+( 0.0 0.0 21.724 )
+
+opt     1 smp 29.553 sec
+
+opt2    1 smp 3.82 sec
+        4core/8smp 0.97 sec
+
+hyperthreading is effective.
+
+
+--------------------------
+frac_diff_minで時間がかかっている。
+
+subroutine frac_diff_min(p,p1,diff)
+   diff=p-p1
+   difflen =  sum(diff**2)
+   ilist=[0,0,0]
+   do i3=-1,1
+   do i2=-1,1
+   do i1=-1,1
+     diff = p-p1-[ i1,i2,i3] 
+     if (difflen > sum(diff**2) ) then 
+        difflen= sum(diff**2) 
+        ilist= [ i1,i2,i3]
+     endif
+   enddo
+   enddo
+   enddo
+
+これがかなりのろい。
+
+改善法１　座標を 0.5より小さいがで区分けする。動くがp or p1=0, 0.5の場合に失敗する。
+改善法２　p-p1<>0.5, -0.5でどのsupercell方向がminimumがわかるのでそれをつかう。
+
+subroutine frac_diff_min(p,p1,diff)
+   diff=p-p1
+   direction=0
+   do i=1,3
+   if (diff(i)>0.5d0) direction(i)=1
+   if (diff(i)<-0.5d0) direction(i)=-1
+   enddo
+   diff=p-p1
+   difflen=sum(diff**2)
+   ilistdir=[0,0,0]
+
+      diff= p-p1-direction
+      if (difflen>sum(diff**2)) then
+        difflen=sum(diff**2)
+        ilistdir=direction
+      endif
+
+検索方向はこれだけでよい。
+ 
+------------------
+OMP
+
+2体部分
+!$omp parallel do private(rri,rrj,rrij,raij,dij,toteij,frcijr,vtmp), reduction(+:tote2,frc2,strs2) ,  schedule(dynamic,2)
+
+3体部分
+!$omp parallel do private(rri,rrj,rrij,raij,rrik,raik,rrk,rrjk,rajk,toteijk,frcijk) , reduction(+:tote3,frc3,strs3) , schedule(dynamic,2)
+
+
+schedule(dynamic)が重要。
+

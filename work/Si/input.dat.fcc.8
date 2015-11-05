@@ -1,0 +1,58 @@
+number_atom 32
+number_element 1
+
+unit_vec ! lattice_list in QMAS
+( 8.00d0,  0.00d0,  0.00d0 )
+( 0.00d0,  8.00d0,  0.00d0 )
+( 0.00d0,  0.00d0,  8.00d0 )
+
+unit_vec_column 1 ! 1: column (default), 2: raw
+unit_length 1 ! 1:Ang (default), 2:Bohr
+atom_pos = 1 ! 1:relative, 2:absolute
+
+atom_list
+14  0.00  0.00  0.00   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.00  0.25  0.25   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.25  0.00  0.25   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.25  0.25  0.00   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.50  0.00  0.00   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.50  0.25  0.25   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.75  0.00  0.25   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.75  0.25  0.00   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.00  0.50  0.00   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.00  0.75  0.25   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.25  0.50  0.25   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.25  0.75  0.00   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.00  0.00  0.50   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.00  0.25  0.75   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.25  0.00  0.75   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.25  0.25  0.50   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.00  0.50  0.50   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.00  0.75  0.75   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.25  0.50  0.75   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.25  0.75  0.50   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.50  0.00  0.50   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.50  0.25  0.75   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.75  0.00  0.75   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.75  0.25  0.50   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.50  0.50  0.00   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.50  0.75  0.25   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.75  0.50  0.25   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.75  0.75  0.00   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.50  0.50  0.50   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.50  0.75  0.75   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.75  0.50  0.75   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+14  0.75  0.75  0.50   1  1  ! zatm, r1, r2, r3, katm, fix/relax
+
+number_max_relax 1 ! default=10
+md_mode 0 ! default=0
+number_max_relax_cell  1 ! default=0, cal_stress in QMAS
+external_stress_v 0.0 0.0 0.0
+time_step 200.0 ! default=500.0
+mass_cell 3.d-4 ! default=5.d-4, lattice_mass in QMAS
+md_mode_cell 1 ! 1:SD (default), 2:quenched MD; cell_opt_mode in QMAS
+
+th_force 1.d-6 ! default=5.d-5
+th_stress 5.d-7 ! default=5.d-7
+
+force_field 1 ! 1:Stillinger-Weber for Si
