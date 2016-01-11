@@ -2,7 +2,7 @@ subroutine frac_diff_min(p,p1,diff)
    implicit none
    real(8),intent(in):: p(3)
    real(8),intent(in)::p1(3)
-   integer:: i1,i2,i3,ilist(3)
+   integer:: i,i1,i2,i3,ilist(3)
    real(8):: diffmin(3),diff(3),difflen,difflendir
    integer::direction(3),ilistdir(3)
 

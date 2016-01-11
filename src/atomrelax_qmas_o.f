@@ -8,8 +8,8 @@
       subroutine atomrelax
 ! *                                                                    *
 ! *     QMD%imd=1: simple molecular dynamics                               *
-! *        =2: simple ralaxation (Steepest decent scheme)              *
-! *        =3: GDIIS                                                   *
+! *        =2: GDIIS                                                   *
+! *        =3: simple ralaxation (Steepest decent scheme)              *
 ! *        =4: quenched MD                                             *
 ! *        =5: damped MD                                               *
 ! *        =6: quickmin                                                *
@@ -27,7 +27,7 @@
 ! --- parameters
       mlin=QMD%nloopa
       QMD%lgdiis=2
-      rdmax=0.25d0
+!      rdmax=0.25d0 ! read from inputfile. default=0.25
 
 ! --- setup
       if ((QMD%loopa==1).and.(QMD%loopc==1)) then
@@ -49,11 +49,11 @@
       QMD%imod2=mod(QMD%loopa,mlin)+1
 
 ! --- input or output of QMD%tstep (file: ***QMD%tstep.txt)
-      if(QMD%loopa==1) then
-        call outtstep
-      else
-        call intstep
-      end if
+!!      if(QMD%loopa==1) then
+!!        call outtstep
+!!      else
+!!        call intstep
+!!      end if
 
 ! --- relative --> absolute
       QMD%ra=matmul(QMD%uv,QMD%rr)
@@ -75,24 +75,25 @@
         call simple_md
       else if(iabs(QMD%imd).eq.2) then
         if(QMD%loopa.le.3) then
-          call quickmin(rdmax,scosth)
+          call quickmin(QMD%rdmax,scosth)
         else
-          call gdiis(mlin,rdmax,scosth,gnorm1m,gnorm0,gnorm,dtoter)
+          call gdiis(mlin,QMD%rdmax,scosth,gnorm1m,gnorm0,gnorm,dtoter)
         end if
       else if(iabs(QMD%imd).eq.3) then
         call simple_relax
       else if(iabs(QMD%imd).eq.4) then
-        call quench_md(rdmax)
+        call quench_md(QMD%rdmax)
       else if(iabs(QMD%imd).eq.5) then
         if(QMD%loopa.le.3) then
-          call quickmin(rdmax,scosth)
+          call quickmin(QMD%rdmax,scosth)
         else
-          call damped_md(rdmax,scosth)
+          call damped_md(QMD%rdmax,scosth)
         end if
       else if(iabs(QMD%imd).eq.6) then
-        call quickmin(rdmax,scosth)
+        call quickmin(QMD%rdmax,scosth)
       else
         call simple_relax
+!        call simple_relax_test(QMD%rdmax)
       end if
 
 ! --- absolute --> relative
@@ -142,6 +143,7 @@
  !         ika=QMD%katm(ina)
           famp=famp+sum(QMD%frc(:,ina)**2)
           vamp=vamp+sum(matmul(QMD%uv,QMD%vrr(:,ina))**2)
+          prd=prd+dot_product(QMD%frc(:,ina),matmul(QMD%uv,QMD%vrr(:,ina)))
         end if
       end do
       famp=dsqrt(famp)

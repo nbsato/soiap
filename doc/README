@@ -3,5 +3,16 @@ Edit make.inc
 % make
 
 === How to run
-Edit input.dat
-% ./opt2_o 
+Edit inputfile
+% ./opt2_o inputfile
+
+=== Inputs
+force_field
+1: Stillinger-Weber for Si
+2: Tsuneyuki for Si-O (under debug)
+3: ZRL for Si-O-N-H systems
+
+optimize internal coordinates
+
+variable cell
+
