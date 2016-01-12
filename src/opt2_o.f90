@@ -22,11 +22,11 @@ program main
 
 ! debug:
   if (QMD%imd/=0.and.abs(QMD%imd)/=3.and.abs(QMD%imd)/=4) then
-     write(*,*)'md_mode should be 0 or 4'
+     write(*,*)'md_mode should be 0, 3 or 4'
 !     write(*,*)'md_mode=0: simple relax'
      write(*,*)'md_mode=0: test mode'
      write(*,*)'md_mode=3: simple relax'
-     write(*,*)'md_mode=4: quqeched MD (default)'
+     write(*,*)'md_mode=4: quenched MD (default)'
      stop 'QMD%imd error: other modes in structure_opt are under debug.'
   endif   
   if (QMD%imdc/=0.and.QMD%imdc/=2) then
@@ -114,7 +114,7 @@ subroutine tote_frc_strs
   if (QMD%ifrcf==1) then ! Stillinger-Weber for Si
      call Stillinger_Weber
   elseif (QMD%ifrcf==2) then ! Tsuneyuki potential for Si-O
-!     stop 'Tsuneyuki potential is under debug'
+     stop 'Tsuneyuki potential is under debug'
      call Tsuneyuki
   elseif (QMD%ifrcf==3) then ! ZRL potential for Si-O
      call ZRL

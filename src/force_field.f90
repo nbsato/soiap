@@ -411,7 +411,7 @@ end subroutine Tsuneyuki_gOO
 subroutine ZRL
 ! Billeter, Curioni, Fischer and Andreoni, PRB73, 155329 (2006); 
 ! PRB79, 169904(E) (2009).
-! augmented Tersoff potenntial for Si-O
+! Augmented Tersoff potenntial for Si-O
   integer :: ipair,i,j,k,l
   real*8 :: tote,frc(3,QMD%natom),strs(3,3)
   real*8 :: rri(3),rrj(3),rrk(3)
@@ -547,12 +547,12 @@ subroutine ZRL
   enddo ! i   
 
   QMD%tote=totem+totec+totep
-  QMD%tote=totem+totec
+!  QMD%tote=totem+totec
 !  QMD%tote=totem
 !  QMD%tote=totec
 !  QMD%tote=totep
   QMD%frc=frcm+frcc+frcp
-  QMD%frc=frcm+frcc
+!  QMD%frc=frcm+frcc
 !  QMD%frc=frcm
 !  QMD%frc=frcc
 !  QMD%frc=frcp
