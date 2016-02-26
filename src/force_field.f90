@@ -316,7 +316,8 @@ subroutine Tsuneyuki_Uij(zatmi,zatmj,r,tote2,frc2r)
         lpair=.true.
      endif  
 
-     if (lpair==.false.) then
+!     if (lpair==.false.) then
+     if (.not.lpair) then
         tote2=0.d0
         frc2r=0.d0
         return
