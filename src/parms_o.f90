@@ -18,6 +18,15 @@ type t_qmasmd
   real*8,allocatable :: frc(:,:),frco(:,:,:),vrr(:,:)
 !  character,allocatable :: katom(:)*2
 
+! lattice_fire
+  integer :: npstvc,fire_nminc ! for FIRE
+  real*8 :: fire_fincc,fire_fdecc,fire_alpc,fire_alp0c,fire_falpc,fire_dtmaxc
+  real*8 :: tstepc
+
+! atomrelax_o.f90
+  integer :: npstv,fire_nmin ! for FIRE
+  real*8 :: fire_finc,fire_fdec,fire_alp,fire_alp0,fire_falp,fire_dtmax
+
 ! atomrelax_qmas.f
   integer :: lgdiis,iuphess,igdiis,imod,imod0,imod2,imdgdiis 
   real*8,allocatable:: rah(:,:,:),gradh(:,:,:),hessi2(:,:)

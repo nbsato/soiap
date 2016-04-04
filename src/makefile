@@ -3,7 +3,7 @@
 
 include make.inc
 
-OBJS_o = algebra.o atomrelax_qmas_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o
+OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o
 
 .f.o:
 	$(FC) -c -o $@ $(FFLAGS_fixed) $*.f  -Iselect
@@ -24,7 +24,7 @@ opt2_o_addtime.f90: opt2_o.f90
 
 algebra.o: algebra.f90
 
-atomrelax_qmas_o.o: parms_o.o 
+atomrelax_o.o: parms_o.o 
 
 force_field.o: parms_o.o algebra.o
 

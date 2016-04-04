@@ -16,15 +16,10 @@ program main
   open(904,file='log.strs',form='formatted')
 
   call input
-  QMD%uvo(:,:,1)=QMD%uv
-  QMD%strso(:,:,1)=QMD%strs
-  QMD%vuv=0.d0
 
-! debug:
   if (QMD%imd/=0.and.abs(QMD%imd)/=3.and.abs(QMD%imd)/=4) then
      write(*,*)'md_mode should be 0, 3 or 4'
-!     write(*,*)'md_mode=0: simple relax'
-     write(*,*)'md_mode=0: test mode'
+     write(*,*)'md_mode=0: FIRE mode'
      write(*,*)'md_mode=3: simple relax'
      write(*,*)'md_mode=4: quenched MD (default)'
      stop 'QMD%imd error: other modes in structure_opt are under debug.'
@@ -36,13 +31,13 @@ program main
      stop 'QMD%imdc error: other modes in structure_opt are under development.'
   endif   
 
+  QMD%uvo(:,:,1)=QMD%uv
+  QMD%strso(:,:,1)=QMD%strs
+  QMD%vuv=0.d0
   do loopc=1,QMD%nloopc ! relax unit cell
      QMD%loopc=loopc
 !     if (QMD%loopc>1) call updt_cell
      call updt_cell
-!     write(901,*)'QMD%tote=',QMD%tote
-!     write(6,*)'QMD%uv(ang)='
-!     write(6,'(3F20.10)') QMD%uv*bohr
      call output_struc(901)
 
      QMD%frco(:,:,1)=QMD%frc
@@ -71,18 +66,9 @@ QMD%loopc,QMD%loopa,QMD%fmax
      do i=1,3
         QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
      enddo   
-     QMD%smax=0.d0
-     do i=1,3
-     do j=1,3
-        if (i==j) then
-           QMD%smax=QMD%smax+QMD%strs(i,j)**2
-        else   
-           QMD%smax=QMD%smax+QMD%strs(i,j)**2*2.d0
-        endif   
-     enddo   
-     enddo   
-     QMD%smax=dsqrt(QMD%smax)
-! debug: >
+
+     call strs_max
+
      call output_strs(904)
      if (QMD%smax<QMD%sth) then
         write(*,'("QMD%strs converged. QMD%loopc, QMD%smax",i5,e12.4)')&
@@ -141,6 +127,24 @@ subroutine tote_frc_strs
 
 end subroutine tote_frc_strs
 
+subroutine strs_max
+  integer :: i,j
+
+  QMD%smax=0.d0
+  do i=1,3
+  do j=1,3
+     if (i==j) then
+        QMD%smax=QMD%smax+QMD%strs(i,j)**2
+     else   
+        QMD%smax=QMD%smax+QMD%strs(i,j)**2*2.d0
+     endif   
+  enddo   
+  enddo   
+
+  QMD%smax=dsqrt(QMD%smax)
+
+end subroutine strs_max
+
 subroutine updt_cell
 
   integer :: ifin,ret,ilength,icolumn,iatompos
@@ -150,11 +154,13 @@ subroutine updt_cell
   QMD%strso(:,:,2)=QMD%strso(:,:,1)
   QMD%strso(:,:,1)=QMD%strs
 
-  if (QMD%loopc==1) return
+  if ((QMD%loopc==1).and.(QMD%imdc.ne.0)) return
 
 !  QMD%vuv=QMD%vuv+0.5d0*QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
 
-  if (QMD%imdc==1) then ! steepest descent
+  if (QMD%imdc==0) then ! fire
+     call lattice_fire(0.1d0)
+  elseif (QMD%imdc==1) then ! steepest descent
      call latticerelax_sd
   elseif (QMD%imdc==2) then ! quenched MD
      call latticerelax
@@ -174,9 +180,11 @@ end subroutine updt_cell
 
 subroutine updt_velocity_cell
  if (QMD%nloopc>1) then
-    QMD%vuv=QMD%vuv+QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
+!    QMD%vuv=QMD%vuv+QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
+    QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell
  else
-    QMD%vuv=QMD%vuv+QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
+!    QMD%vuv=QMD%vuv+QMD%tste*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
+    QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
  endif   
 end subroutine updt_velocity_cell
 
@@ -192,40 +200,8 @@ subroutine updt_coord
   endif   
   QMD%rro(:,:,1)=QMD%rr
   QMD%frco(:,:,1)=QMD%frc
-  vrrmax=0.d0
-  if (QMD%loopa>1) then
-     do ia=1,QMD%natom
-!        rfac=0.5d0*QMD%tstep/(QMD%mass(ia)*QMD%mfac(ia))
-!        QMD%vrr(:,ia)=QMD%vrr(:,ia)+rfac*matmul(QMD%frc(:,ia),QMD%bv(:,:))
-        vrrabs=dsqrt(sum(QMD%vrr(:,ia)**2))
-        if (vrrabs>vrrmax) vrrmax=vrrabs
-     enddo   
-  endif   
 
   call atomrelax
-
-  if (QMD%loopa>2) then
-     allocate(ratmp(3,QMD%natom,0:2))
-     do ia=1,QMD%natom
-        ratmp(:,:,0)=matmul(QMD%uv,QMD%rr)
-        ratmp(:,:,1)=matmul(QMD%uv,QMD%rro(:,:,1))
-        ratmp(:,:,2)=matmul(QMD%uv,QMD%rro(:,:,2))
-     enddo   
-     p1=0.d0
-     p2=0.d0
-     do ia=1,QMD%natom
-        p1=p1+sum((ratmp(:,ia,0)-ratmp(:,ia,1))*(ratmp(:,ia,1)-ratmp(:,ia,2)))
-        p2=p2+sum((ratmp(:,ia,1)-ratmp(:,ia,2))**2)
-     enddo   
-     deallocate(ratmp)
-     if (dabs(p2)<1.d-8) then
-        QMD%alphalm=0.d0
-     else
-        QMD%alphalm=p1/p2
-     endif
-  else ! QMD%loopa
-     QMD%alphalm=0.d0
-  endif ! QMD%loopa>2   
 
 end subroutine updt_coord    
 

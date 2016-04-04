@@ -143,6 +143,7 @@ QMD%katm(i),QMD%iposfix(i)
   if (itime==1) QMD%tstep=QMD%tstep*100/2.418884326505
   write(*,*)'time_step [a.u.] =',QMD%tstep
   QMD%tstep0=QMD%tstep
+  QMD%tstepc=QMD%tstep
 
   call getkeyvalue(inputfilename,"th_force",QMD%fth,default=5.d-5)
   write(*,*)'th_force =',QMD%fth

@@ -27,25 +27,98 @@ subroutine latticerelax
            c2=1.d0-c1
            dtmp=c1*QMD%uvo(i,j,1)+c2*QMD%uvo(i,j,2)-QMD%uv(i,j)
         else   
-           dtmp=0.5d0*QMD%tstep*QMD%tstep*auv(i,j,1)/QMD%mcell
+!           dtmp=0.5d0*QMD%tstep*QMD%tstep*auv(i,j,1)/QMD%mcell
+           dtmp=0.5d0*QMD%tstepc*QMD%tstepc*auv(i,j,1)/QMD%mcell
         endif
         dtmp=dmax1(dtmp,-0.1d0)
         dtmp=dmin1(dtmp, 0.1d0)
         QMD%uv(i,j)=QMD%uv(i,j)+dtmp
         QMD%vuv(i,j)=0.d0
      else
-        QMD%uv(i,j)=QMD%uv(i,j)+QMD%tstep*QMD%vuv(i,j)
+!        QMD%uv(i,j)=QMD%uv(i,j)+QMD%tstep*QMD%vuv(i,j)
+        QMD%uv(i,j)=QMD%uv(i,j)+QMD%tstepc*QMD%vuv(i,j)
      endif   
   enddo ! i   
   enddo ! j   
 
 end subroutine latticerelax
 
+subroutine lattice_fire(rdmax)
+  use paramlist
+  implicit none
+  integer i
+  real*8 p,vnorm,fnorm,duv(3),dd,rdmax,f(3)
+! parameters
+      integer nmin
+      real*8 finc,fdec,alp0,falp,dtmax
+!
+      if (QMD%loopc==1) then
+        QMD%fire_nminc=5
+        QMD%fire_fincc=1.1d0
+        QMD%fire_fdecc=0.5d0
+        QMD%fire_alp0c=0.1d0
+        QMD%fire_falpc=0.99d0
+        QMD%fire_dtmaxc=QMD%tstep0*10.0d0
+        QMD%fire_alpc=QMD%fire_alp0c
+        return
+      endif
+! F1
+! p=F.v
+! F=matmul(strs*uv)
+      p=0.0d0
+      vnorm=0.0d0
+      fnorm=0.0d0
+      do i=1,3
+        f=matmul(QMD%strs,QMD%uv(:,i))
+        p=p+sum(QMD%vuv(:,i)*f)
+        vnorm=vnorm+sum(QMD%vuv(:,i)**2)
+        fnorm=fnorm+sum(f**2)
+      enddo  
+      if (p.gt.0.0d0) then 
+         QMD%npstvc=QMD%npstvc+1
+      else
+         QMD%npstvc=0
+      endif   
+      vnorm=sqrt(vnorm)
+      fnorm=sqrt(fnorm)
+! F2
+      do i=1,3
+        QMD%vuv(:,i)=(1.0d0-QMD%fire_alpc)*QMD%vuv(:,i)+ &
+        QMD%fire_alpc*f(:)/fnorm*vnorm
+      enddo  
+! F3
+      if ((p.gt.0.0d0).and.(QMD%npstv.gt.QMD%fire_nminc)) then
+         QMD%tstepc=min(QMD%tstepc*QMD%fire_fincc,QMD%fire_dtmaxc)
+         QMD%fire_alpc=QMD%fire_alpc*QMD%fire_falpc
+      endif   
+! F4
+      if (p.le.0.0d0) then
+         QMD%tstepc=QMD%tstepc*QMD%fire_fdecc
+         QMD%vuv=0.0d0
+         QMD%fire_alpc=QMD%fire_alp0c
+      endif   
+! MD
+      do i=1,3
+          duv(:)=QMD%tstepc*QMD%vuv(:,i)
+          dd=dsqrt(sum(duv**2))
+          if(dd.gt.rdmax) then
+            duv=duv*rdmax/dd
+            dd=rdmax
+          endif 
+          QMD%uv(:,i)=QMD%uv(:,i)+duv(:)
+!          write(6,'(i3,2x,3d14.6)') ina,duv(1:3)
+      enddo   
+
+! debug:
+      write(*,'(a,i5,3f16.8)')'lattice_fire',QMD%loopc,p,vnorm/3,fnorm/3
+
+end subroutine lattice_fire
+
 subroutine lattice_simple_relax
   use paramlist
- QMD%uv=QMD%uv+QMD%tstep*QMD%vuv
+! QMD%uv=QMD%uv+QMD%tstep*QMD%vuv
+ QMD%uv=QMD%uv+QMD%tstepc*QMD%vuv
  QMD%vuv=0.d0
-
 end subroutine lattice_simple_relax
 
 subroutine latticerelax_sd
