@@ -440,6 +440,7 @@ contains
     integer, parameter :: iunit = 101
     logical :: ex
     character(256) :: buf, tag, value(10)
+    integer :: i
 
     logical :: loop_atom, loop_symm
     integer :: column, column_max
@@ -462,22 +463,46 @@ contains
 
        select case(tag)
        case("_cell_length_a")
-          read(buf,*) tag, cif%cell%length_a
+          i = index(buf, "(")
+          if( i == 0 ) then
+             i = len(buf) + 1
+          end if
+          read(buf(1:i-1),*) tag, cif%cell%length_a
 
        case("_cell_length_b")
-          read(buf,*) tag, cif%cell%length_b
+          i = index(buf, "(")
+          if( i == 0 ) then
+             i = len(buf) + 1
+          end if
+          read(buf(1:i-1),*) tag, cif%cell%length_b
 
        case("_cell_length_c")
-          read(buf,*) tag, cif%cell%length_c
+          i = index(buf, "(")
+          if( i == 0 ) then
+             i = len(buf) + 1
+          end if
+          read(buf(1:i-1),*) tag, cif%cell%length_c
 
        case("_cell_angle_alpha")
-          read(buf,*) tag, cif%cell%angle_alpha
+          i = index(buf, "(")
+          if( i == 0 ) then
+             i = len(buf) + 1
+          end if
+          read(buf(1:i-1),*) tag, cif%cell%angle_alpha
 
        case("_cell_angle_beta")
-          read(buf,*) tag, cif%cell%angle_beta
+          i = index(buf, "(")
+          if( i == 0 ) then
+             i = len(buf) + 1
+          end if
+          read(buf(1:i-1),*) tag, cif%cell%angle_beta
 
        case("_cell_angle_gamma")
-          read(buf,*) tag, cif%cell%angle_gamma
+          i = index(buf, "(")
+          if( i == 0 ) then
+             i = len(buf) + 1
+          end if
+          read(buf(1:i-1),*) tag, cif%cell%angle_gamma
 
        case("loop_")
           loop_atom = .false.
