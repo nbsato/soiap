@@ -47,7 +47,7 @@ subroutine lattice_fire(rdmax)
   use paramlist
   implicit none
   integer i
-  real*8 p,vnorm,fnorm,duv(3),dd,rdmax,f(3)
+  real*8 p,vnorm,fnorm,duv(3),dd,rdmax,f(3,3)
 ! parameters
       integer nmin
       real*8 finc,fdec,alp0,falp,dtmax
@@ -69,10 +69,10 @@ subroutine lattice_fire(rdmax)
       vnorm=0.0d0
       fnorm=0.0d0
       do i=1,3
-        f=matmul(QMD%strs,QMD%uv(:,i))
-        p=p+sum(QMD%vuv(:,i)*f)
+        f(:,i)=matmul(QMD%strs,QMD%uv(:,i))
+        p=p+sum(QMD%vuv(:,i)*f(:,i))
         vnorm=vnorm+sum(QMD%vuv(:,i)**2)
-        fnorm=fnorm+sum(f**2)
+        fnorm=fnorm+sum(f(:,i)**2)
       enddo  
       if (p.gt.0.0d0) then 
          QMD%npstvc=QMD%npstvc+1
@@ -84,7 +84,7 @@ subroutine lattice_fire(rdmax)
 ! F2
       do i=1,3
         QMD%vuv(:,i)=(1.0d0-QMD%fire_alpc)*QMD%vuv(:,i)+ &
-        QMD%fire_alpc*f(:)/fnorm*vnorm
+        QMD%fire_alpc*f(:,i)/fnorm*vnorm
       enddo  
 ! F3
       if ((p.gt.0.0d0).and.(QMD%npstv.gt.QMD%fire_nminc)) then
