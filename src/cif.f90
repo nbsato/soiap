@@ -472,9 +472,11 @@ contains
 
     open(iunit, file=filename)
 
-    do 
+    read(iunit, '(a)', end=100) buf
+    do while( uncomment(buf) )
        read(iunit, '(a)', end=100) buf
-       if( uncomment(buf) ) cycle
+    end do
+    do 
        read(buf,*) tag
 
        select case(tag)
@@ -599,6 +601,11 @@ contains
              cycle
           end if
        end select
+
+       read(iunit, '(a)', end=100) buf
+       do while( uncomment(buf) )
+          read(iunit, '(a)', end=100) buf
+       end do
     end do
 100 continue
     close(iunit)
