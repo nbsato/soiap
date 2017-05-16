@@ -391,9 +391,6 @@ contains
        if( line(i:i) == '=' ) then
           line(i:i) = ' '
        end if
-       if( line(i:i) == "'" .and. line(i+1:i+1) /= " " ) then
-          line(i:i) = ' '
-       end if
     end do
 
     if( len_trim(line) == 0 ) then
@@ -408,21 +405,40 @@ contains
     character(len=*), intent(in) :: buf
 
     integer :: lbuf, i, j, lval
+    character :: mark
+    integer :: iend
 
     lbuf = len(buf)
     lval = 0
     j=1
     value(:) = ""
-    do i=1, lbuf
+    i = 1
+    do while( i <= lbuf )
        if( buf(i:i) == " " ) then
           if( lval>0 ) then
              j = j + 1
              lval = 0
           end if
+       else if( buf(i:i) == "'" .or. buf(i:i) == '"' ) then
+          mark = buf(i:i)
+          iend = i + index(buf(i+1:), mark)
+          if( iend == i ) then ! symbol, not matching quotes
+             value(j) = trim(value(j)) // buf(i:i)
+             lval = lval + 1
+          else ! matching quotes
+             if( lval>0 ) then
+                j = j + 1
+             end if
+             value(j) = buf(i:iend)
+             j = j + 1
+             lval = 0
+          end if
+          i = iend
        else
           value(j) = trim(value(j)) // buf(i:i)
           lval = lval + 1
        end if
+       i = i + 1
     end do
 
   end subroutine split
