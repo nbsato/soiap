@@ -232,9 +232,12 @@ contains
     type(Operation_type) :: operation
 
     character(len=256) :: axis(3)
-    character(len=256) :: fraction
     integer :: is, ie, n
-    real(8) :: numerator, denominator
+    real(8) :: mv_row(4)
+    character :: op
+    real(8) :: val
+    integer :: inext
+    integer :: i, k
 
     is = 1
     if( xyz(is:is) == "'" ) then
@@ -258,59 +261,54 @@ contains
        axis(3) = xyz(is:is-1+ie-1)
     end if
 
-    do n=1, 3
-       if( index(trim(axis(n)), "-x")>0 ) then
-          operation%transM(n,1) = -1.0d0
-       else if( index(trim(axis(n)), "x")>0 ) then
-          operation%transM(n,1) = +1.0d0
-       else
-          operation%transM(n,1) =  0.0d0
-       end if
-
-       if( index(trim(axis(n)), "-y")>0 ) then
-          operation%transM(n,2) = -1.0d0
-       else if( index(trim(axis(n)), "y")>0 ) then
-          operation%transM(n,2) = +1.0d0
-       else
-          operation%transM(n,2) =  0.0d0
-       end if
-
-       if( index(trim(axis(n)), "-z")>0 ) then
-          operation%transM(n,3) = -1.0d0
-       else if( index(trim(axis(n)), "z")>0 ) then
-          operation%transM(n,3) = +1.0d0
-       else
-          operation%transM(n,3) =  0.0d0
-       end if
-    end do
+    axis(:) = adjustl(axis(:))
 
     do n=1, 3
-       is = verify(trim(axis(n)), "+-/.0123456789", back=.true.)
-       fraction = axis(n)(is+1:)
-       
-       if( fraction == "" ) then
-          operation%transV(n) = 0.0d0;
-          cycle
+       mv_row(:) = 0.0d0
+       op = "+" ! the first term is always added
+
+       i = 1
+       do while( i <= len_trim(axis(n)) )
+          ! numerical value
+          call read_numerical_value(axis(n)(i:), val, inext)
+          if( inext == 1 ) then ! coefficient 1 is omitted
+             val = 1.0d0
+          end if
+          i = i + inext - 1
+
+          ! coefficient of x, y, z or constant term
+          if( i > len_trim(axis(n)) ) then ! axis(n) ends with a constant term
+             k = 4
+          else
+             k = scan("xyz", axis(n)(i:i)) ! k = 1 for x, 2 for y, 3 for z
+             if( k <= 0 ) then ! constant term
+                k = 4
+             else
+                i = i + 1 ! point the next of x, y, z
+             end if
+          end if
+          if( op == "+" ) then
+             mv_row(k) = mv_row(k) + val
+          else ! if( op == "-" ) then
+             mv_row(k) = mv_row(k) - val
+          end if
+          if( i > len_trim(axis(n)) ) then
+             op = " "
+             exit
+          end if
+
+          ! binary operator
+          op = axis(n)(i:i)
+          if( op /= "+" .and. op /= "-" ) goto 1010
+          i = i + 1
+       end do
+       if( len_trim(op) > 0 ) goto 1010 ! axis(n) ends with a binary operator
+
+       if( mv_row(4) < 0.0d0 ) then
+          mv_row(4) = mv_row(4) + ceiling(-mv_row(4))
        end if
-       
-       ie = verify(trim(fraction), "+-.0123456789")
-       if( ie<=0 ) then
-          read(fraction(1:),*) numerator
-       else
-          read(fraction(1:ie-1),*) numerator
-       end if
-       
-       is = verify(trim(fraction), ".0123456789", back=.true.)
-       if( is<=0 ) then
-          denominator = 1.0d0
-       else
-          read(fraction(is+1:),*) denominator
-       end if
-       
-       operation%transV(n) = numerator/denominator
-       if( operation%transV(n) < 0.0d0 ) then
-          operation%transV(n) = operation%transV(n) + 1.0d0
-       end if
+       operation%transM(n,:) = mv_row(1:3)
+       operation%transV(n) = mv_row(4)
     end do
     return
 
@@ -318,6 +316,91 @@ contains
     write(*,*) "broken operation string", trim(xyz)
     stop
   end function Operation_construct
+
+  !!----------------
+  !! read a decimal or fraction from the beginning of a string
+  !!   str: string to be read
+  !!   val: value read from 'str', or undefined if 'str' does not start with a 
+  !!        decimal and fraction
+  !!   inext: index in 'str' pointing the next of the read value, i.e., this is 
+  !!          1 if 'str' does not start with a decimal and fraction
+  !!----------------
+  subroutine read_numerical_value( str, val, inext )
+    character(len=*), intent(in) :: str
+    real(8), intent(out) :: val
+    integer, intent(out) :: inext
+
+    real(8) :: denominator
+    integer :: istart
+
+    call read_decimal(str, val, inext)
+    if( inext == 1 ) return
+
+    ! fraction
+    if( inext <= len_trim(str) .and. str(inext:inext) == "/" ) then
+       istart = inext + 1
+       if( istart > len_trim(str) ) then
+          inext = 1
+          return
+       end if
+       call read_decimal(str(istart:), denominator, inext)
+       if( inext == 1 ) return
+       inext = istart + inext - 1
+       val = val / denominator
+    end if
+  end subroutine read_numerical_value
+
+  !!----------------
+  !! read a decimal from the beginning of a string
+  !!   str: string to be read
+  !!   val: value read from 'str', or undefined if 'str' does not start with a 
+  !!        decimal
+  !!   inext: index in 'str' pointing the next of the read decimal, i.e., this 
+  !!          is 1 if 'str' does not start with a decimal
+  !!----------------
+  subroutine read_decimal( str, val, inext )
+    character(len=*), intent(in) :: str
+    real(8), intent(out) :: val
+    integer, intent(out) :: inext
+
+    if( len_trim(str) == 0 ) then
+       inext = 1
+       return
+    end if
+
+    ! set inext
+    select case( str(1:1) )
+       case("+", "-") ! sign
+          inext = verify(trim(str(2:)), ".0123456789")
+          if( inext > 0 ) then
+             inext = inext + 1
+          end if
+       case default
+          inext = verify(trim(str), ".0123456789")
+    end select
+    if( inext <= 0 ) then
+       inext = len_trim(str) + 1
+    end if
+
+    if( inext == 1 ) then ! not start with a decimal
+       return
+    else if( inext == 2 ) then
+       select case( str(1:1) )
+          case("+")
+             val = 1.0d0
+          case("-")
+             val = -1.0d0
+          case default
+             read(str(1:1),*,err=100) val
+       end select
+    else ! if( inext > 2 ) then
+       read(str(1:inext-1),*,err=100) val
+    end if
+    return
+
+100 continue
+    inext = 1
+  end subroutine read_decimal
 
   function Operation_operate( operation, p_org ) result(p_new)
     type(Operation_type), intent(in) :: operation
