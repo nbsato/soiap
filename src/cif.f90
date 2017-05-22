@@ -662,6 +662,9 @@ contains
                 read(iunit, '(a)', end=100) buf
                 if( uncomment(buf) ) exit
              end do
+             do while( uncomment(buf) )
+                read(iunit, '(a)', end=100) buf
+             end do
              cycle
           end if
 
@@ -680,6 +683,9 @@ contains
 
                 read(iunit, '(a)', end=100) buf
                 if( uncomment(buf) ) exit
+             end do
+             do while( uncomment(buf) )
+                read(iunit, '(a)', end=100) buf
              end do
              cycle
           end if
