@@ -13,27 +13,45 @@ program main
   open(901,file='log.struc',form='formatted')
   open(902,file='log.tote',form='formatted')
   write(902,*)'# loopc,loopa,tote,fmax,tote/natom,omega,omega/natom'
-  !  open(903,file='log.frc',form='formatted')
+  open(903,file='log.frc',form='formatted')
   open(904,file='log.strs',form='formatted')
 
   call input
 
-  if (QMD%imd/=0.and.abs(QMD%imd)/=3.and.abs(QMD%imd)/=4) then
-     write(*,*)'md_mode should be 0, 3 or 4'
+  if (QMD%imd/=0.and.QMD%imd/=1.and.abs(QMD%imd)/=3.and.abs(QMD%imd)/=4) then
+     write(*,*)'md_mode should be 0, 1, 3 or 4'
      write(*,*)'md_mode=0: FIRE mode'
+     write(*,*)'md_mode=1: no md'
      write(*,*)'md_mode=3: simple relax'
      write(*,*)'md_mode=4: quenched MD (default)'
      stop 'QMD%imd error: other modes in structure_opt are under debug.'
   endif
-  if (QMD%imdc/=0.and.QMD%imdc/=2.and.QMD%imdc/=3) then
-     write(*,*)'md_mode_cell should be 0 2 or 3'
+  if (QMD%imdc/=0.and.QMD%imdc/=1.and.QMD%imdc/=2.and.QMD%imdc/=3) then
+     write(*,*)'md_mode_cell should be 0 1 2 or 3'
      write(*,*)'md_mode_cell=0: simple relax'
+     write(*,*)'md_mode_cell=1: no relax'
      write(*,*)'md_mode_cell=2: quenched MD (default)'
      write(*,*)'md_mode_cell=3: RFC5'
      stop 'QMD%imdc error: other modes in structure_opt are under development.'
   endif
 
-  if( QMD%imdc == 3 ) then
+  if( QMD%imd == 1 .and. QMD%imdc == 1 ) then
+     call timer%start()
+     call tote_frc_strs
+     call timer%stop()
+     call timer%show("tote_frc_strs:")
+
+     do i=1,3
+        QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
+     enddo
+
+     call output_struc(901)
+     call output_tote(902)
+     call output_frc(903)
+     call output_strs(904)
+
+     call strs_max
+  else if( QMD%imdc == 3 ) then
      do loopc=1,QMD%nloopc*QMD%nloopa
         QMD%loopc=loopc
         QMD%loopa=loopc
@@ -48,6 +66,8 @@ program main
 
         call output_struc(901)
         call output_tote(902)
+        call output_frc(903)
+        call output_strs(904)
 
         call strs_max
 
@@ -98,6 +118,7 @@ program main
 
         call strs_max
 
+        call output_frc(903)
         call output_strs(904)
         if (QMD%smax<QMD%sth) then
            write(*,'("QMD%strs converged. QMD%loopc, QMD%smax",i5,e12.4)')&
@@ -277,6 +298,17 @@ contains
     return
   end subroutine output_tote
 
+  subroutine output_frc(ifo)
+    integer :: ifo,i,j
+
+    write(ifo,*)'*** atomic forces: QMD%loopc =',QMD%loopc
+    do j=1,QMD%natom
+       write(ifo,"(3f23.16)")(QMD%frc(i,j),i=1,3)
+    enddo
+
+    return
+  end subroutine output_frc
+
   subroutine output_strs(ifo)
     integer :: ifo,i,j
 
@@ -284,7 +316,7 @@ contains
     write(ifo,'("QMD%loopc, QMD%smax",i5,2e16.6,e23.10)')QMD%loopc,&
          QMD%smax,QMD%sth,QMD%tote
     do i=1,3
-       write(ifo,"(3f12.6)")(QMD%strs(i,j),j=1,3)
+       write(ifo,"(3f20.10)")(QMD%strs(i,j),j=1,3)
     enddo
 
     return
