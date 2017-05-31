@@ -9,12 +9,16 @@ module frcfield
 subroutine Stillinger_Weber
 
   integer :: i,j,k
+  integer :: jj,kk
   real*8 :: tote2,tote3,frc2(3,QMD%natom),frc3(3,QMD%natom),strs2(3,3),strs3(3,3)
   real*8 :: rri(3),rrj(3),rrk(3)
-  real*8 :: rrij(3),raij(3),dij,rrik(3),raik(3),dik,rrjk(3),rajk(3),djk
+  real*8 :: rrij(3),raij(3),dij,rrik(3),raik(3),rrjk(3),rajk(3)
   real*8 :: toteij,frcijr,toteijk,frcijk(3,3),vtmp(3)
+  integer, allocatable :: shiftj(:,:),shiftk(:,:)
 ! debug:
+  real*8 :: a_cut
   real*8 :: sigma,eps,e1,e2,e3,vol,rho,faemp
+  parameter (a_cut=1.8d0)
   parameter (sigma=3.959164919d0) ! in Bohr
   parameter (eps=7.968005097d-2) ! in Hartree
 
@@ -22,59 +26,67 @@ subroutine Stillinger_Weber
   tote2=0.d0
   frc2=0.d0
   strs2=0.d0
-!$omp parallel do private(rri,rrj,rrij,raij,dij,toteij,frcijr,vtmp), reduction(+:tote2,frc2,strs2) ,  schedule(dynamic,2)
-  do i=1,QMD%natom-1
-  do j=i+1,QMD%natom
+!$omp parallel do private(shiftj,rri,rrj,rrij,raij,dij,toteij,frcijr,vtmp), reduction(+:tote2,frc2,strs2) ,  schedule(dynamic,2)
+  do i=1,QMD%natom
      rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-!     call frac_diff_min(rri,rrj,rrij) ! rrij = rri - rrj
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij)
-     dij=sqrt(sum(raij**2))
-     if (QMD%zatm(i)==14.and.QMD%zatm(j)==14) &
-     call SW_Si_2body(dij,toteij,frcijr)
-     tote2=tote2+toteij
-     vtmp= frcijr*raij(:)/dij
-     frc2(:,i)= frc2(:,i)-vtmp
-     frc2(:,j)= frc2(:,j)+vtmp
-     do k=1,3
-     strs2(:,k)=strs2(:,k)+vtmp*raij(k)
-     enddo
-  enddo ! j
+     do j=i,QMD%natom
+        shiftj=periodic_replica(j,i,a_cut*sigma)
+        do jj=1,size(shiftj,dim=2)
+           if (j==i.and.all(shiftj(:,jj)==floor(rri(:)))) cycle
+           rrj=shiftj(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij)
+           dij=sqrt(sum(raij**2))
+           if (QMD%zatm(i)==14.and.QMD%zatm(j)==14) &
+           call SW_Si_2body(dij,toteij,frcijr)
+           tote2=tote2+toteij
+           vtmp= frcijr*raij(:)/dij
+           frc2(:,i)= frc2(:,i)-vtmp
+           frc2(:,j)= frc2(:,j)+vtmp
+           do k=1,3
+              strs2(:,k)=strs2(:,k)+vtmp*raij(k)
+           enddo
+        enddo ! jj
+        deallocate(shiftj)
+     enddo ! j
   enddo ! i
 
 ! three-body term
   tote3=0.d0
   frc3=0.d0
   strs3=0.d0
-!$omp parallel do private(rri,rrj,rrij,raij,rrik,raik,rrk,rrjk,rajk,toteijk,frcijk) , reduction(+:tote3,frc3,strs3) , schedule(dynamic,2)
-  do i=1,QMD%natom-2
-  do j=i+1,QMD%natom-1
-  do k=j+1,QMD%natom
+!$omp parallel do private(shiftj,shiftk,rri,rrj,rrij,raij,rrik,raik,rrk,rrjk,rajk,toteijk,frcijk) , reduction(+:tote3,frc3,strs3) , schedule(dynamic,2)
+  do i=1,QMD%natom
      rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-!     call frac_diff_min(rri,rrj,rrij) ! rrij = rri - rrj
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij)
-     rri=QMD%rr(:,i)
-     rrk=QMD%rr(:,k)
-!     call frac_diff_min(rri,rrk,rrik) ! rrik = rri - rrk
-     call frac_diff_min(rrk,rri,rrik) ! rrik = rrk - rri
-     raik=matmul(QMD%uv,rrik)
-     rrj=QMD%rr(:,j)
-     rrk=QMD%rr(:,k)
-!     call frac_diff_min(rrj,rrk,rrjk) ! rrjk = rrj - rrk
-     call frac_diff_min(rrk,rrj,rrjk) ! rrjk = rrk - rrj
-     rajk=matmul(QMD%uv,rrjk)
-     if (QMD%zatm(i)==14.and.QMD%zatm(j)==14.and.QMD%zatm(k)==14) &
-     call SW_Si_3body(raij,raik,rajk,toteijk,frcijk,strs3)
-!     call SW_Si_3body(-raij,-raik,-rajk,toteijk,frcijk,strs3)
-     tote3=tote3+toteijk
-     frc3(:,i)= frc3(:,i)+frcijk(:,1)
-     frc3(:,j)= frc3(:,j)+frcijk(:,2)
-     frc3(:,k)= frc3(:,k)+frcijk(:,3)
-  enddo ! k
-  enddo ! j
+     do j=i,QMD%natom
+        shiftj=periodic_replica(j,i,2*a_cut*sigma) ! interaction range is twice the cutoff radius
+        do jj=1,size(shiftj,dim=2)
+           if (j==i.and.all(shiftj(:,jj)==floor(rri(:)))) cycle
+           rrj=shiftj(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij)
+           do k=j,QMD%natom
+              shiftk=periodic_replica(k,i,2*a_cut*sigma) ! interaction range is twice the cutoff radius
+              do kk=1,size(shiftk,dim=2)
+                 if (k==i.and.all(shiftk(:,kk)==floor(rri(:)))) cycle
+                 if (k==j.and.kk<=jj) cycle
+                 rrk=shiftk(:,kk)+modulo(QMD%rr(:,k),1.0d0)
+                 rrik=rrk(:)-rri(:)
+                 raik=matmul(QMD%uv,rrik)
+                 rrjk=rrk(:)-rrj(:)
+                 rajk=matmul(QMD%uv,rrjk)
+                 if (QMD%zatm(i)==14.and.QMD%zatm(j)==14.and.QMD%zatm(k)==14) &
+                 call SW_Si_3body(raij,raik,rajk,toteijk,frcijk,strs3)
+                 tote3=tote3+toteijk
+                 frc3(:,i)= frc3(:,i)+frcijk(:,1)
+                 frc3(:,j)= frc3(:,j)+frcijk(:,2)
+                 frc3(:,k)= frc3(:,k)+frcijk(:,3)
+              enddo ! kk
+              deallocate(shiftk)
+           enddo ! k
+        enddo ! jj
+        deallocate(shiftj)
+     enddo ! j
   enddo ! i
 
 ! total
@@ -1152,5 +1164,58 @@ real(8) function ZRL_ci2(z)
   endif
   ZRL_ci2=ZRL_ci2/hartree ! eV to Hartree
 end function ZRL_ci2
+
+function periodic_replica(i,i0,rcut) result(shift_replica)
+  implicit none
+  integer, intent(in) :: i ! target atom
+  integer, intent(in) :: i0 ! centered atom
+  real(8), intent(in) :: rcut ! cutoff radius
+  integer, allocatable :: shift_replica(:,:),temp(:,:)
+  integer :: num_replica
+  real(8) :: rr_replica(3),ra_replica(3)
+  real(8) :: d
+  real(8) :: cell_cut(3)
+  integer :: s_min(3),s_max(3)
+  integer :: shift(3)
+  integer :: s1,s2,s3
+
+  allocate(shift_replica(3,0))
+  num_replica = 0
+
+  ! 1/8 size of a supercell circumscribing a sphere of radius 'rcut'
+  cell_cut(:) = sqrt(sum(QMD%bv**2,dim=1))*rcut
+
+  s_min(:) = floor(QMD%rr(:,i0)-cell_cut(:))
+  s_max(:) = floor(QMD%rr(:,i0)+cell_cut(:))
+
+  do s3=s_min(3),s_max(3)
+     shift(3) = s3
+     do s2=s_min(2),s_max(2)
+        shift(2) = s2
+        do s1=s_min(1),s_max(1)
+           shift(1) = s1
+           rr_replica = shift(:)+modulo(QMD%rr(:,i),1.0d0)
+           ra_replica = matmul(QMD%uv,rr_replica)
+           d = sqrt(sum((ra_replica(:)-QMD%ra(:,i0)) ** 2))
+           if (d>rcut) then
+              cycle
+           endif
+
+           if (size(shift_replica,dim=2)==num_replica) then
+              allocate(temp(3,num_replica+4)) ! 4 more sapce
+              temp(:,1:num_replica) = shift_replica(:,:)
+              call move_alloc(temp,shift_replica) ! 'temp' is deallocated
+           endif
+
+           shift_replica(:,num_replica+1) = shift(:)
+           num_replica = num_replica+1
+
+        enddo
+     enddo
+  enddo
+
+  shift_replica = shift_replica(:,1:num_replica)
+
+end function periodic_replica
 
 end module
