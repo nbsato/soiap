@@ -661,7 +661,7 @@ subroutine ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
 
    bijij=chiij*(1.0d0+(betai*ztijij)**ni)**(-0.5d0/ni)
 !   bijij=chiij*(1.0d0+(betai*ztijij)**ni)**(-0.5d0*ni)
-   dbijijdztij=-0.5d0*ni*chiij*(1.0d0+(betai*ztijij)**ni)**(-0.5d0/ni-1.0d0)*ni*(betai*ztijij)**(ni-1.0d0)*betai
+   dbijijdztij=-0.5d0/ni*chiij*(1.0d0+(betai*ztijij)**ni)**(-0.5d0/ni-1.0d0)*ni*(betai*ztijij)**(ni-1.0d0)*betai
    dbdri=dbijijdztij*dbdri
    dbdrj=dbijijdztij*dbdrj
    dbdrk=dbijijdztij*dbdrk
