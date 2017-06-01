@@ -3,8 +3,13 @@ module rfc5
   use cif_module
   implicit none
 
-  ! depth of GDIIS history
-  integer, parameter   :: gdiis_steps = 6
+  ! parameters for optimization
+  logical, parameter :: fix_first_atom = .false. ! fix coords of the first atom for debug
+  logical, parameter :: fix_atoms = .false.  ! fix atoms coords for debug
+  logical, parameter :: fix_units = .false.  ! fix unit vectors for debug
+  integer, parameter :: gdiis_start_step = 2 ! start of GDIIS steps
+  integer, parameter :: gdiis_steps = 6      ! depth of GDIIS steps
+  real(8), parameter :: criterion_max_diff = 0.10d0 ! modulation criterion for diff[Bohr]
 
   ! module arrays for optimization history
   real(8), allocatable :: coord_recent(:,:,:)
@@ -19,6 +24,7 @@ contains
     integer :: size ! total size of positions
     integer :: i, j, k, ia
     integer :: info
+    real(8) :: force_mean(3), max_diff
 
     ! local variables for GDIIS
     real(8), allocatable :: overlap_ff(:,:), beta(:)
@@ -76,17 +82,44 @@ contains
        force_recent(:,:,i+1) = force_recent(:,:,i)
     end do
 
-    ! record the latest coords and forces of atoms and unit vectors
+    ! record the latest coords and forces of atoms
     do ia=1, QMD%natom
-       coord_recent(:,ia,1) = QMD%rr(:,ia) ! use relative coordinate
-       force_recent(:,ia,1) = QMD%frc(:,ia)
+       coord_recent(:,ia,1) = QMD%ra(:,ia) ! use absolute coordinate
+       force_recent(:,ia,1) = QMD%frc(:,ia) ! use force in absolute coordinate
     end do
+
+    ! remove numerical errors in the sum of force_recent(:,:,1)
+    force_mean(:) = 0.0d0
+    do ia=1, QMD%natom
+       force_mean(:) = force_mean(:) + force_recent(:,ia,1)
+    end do
+    force_mean(:) = force_mean(:)*(1.0d0/QMD%natom)
+    do ia=1, QMD%natom
+       force_recent(:,ia,1) = force_recent(:,ia,1) - force_mean(:)
+    end do
+
+    ! record the latest coords and forces of unit vectors
     do ia=1, 3
-       coord_recent(:,QMD%natom+ia,1) = QMD%uv(:,ia)
+       coord_recent(:,QMD%natom+ia,1) = QMD%uv(:,ia) ! use absolute coordinate
        force_recent(:,QMD%natom+ia,1) = QMD%omega * matmul( QMD%strs(:,:), QMD%bv(:,ia) )
     end do
 
-    if( loop<gdiis_steps ) then
+    if( fix_atoms ) then
+       do ia=1, QMD%natom
+          force_recent(:,ia,1) = 0.0d0
+       end do
+    else if( fix_first_atom ) then
+       ia=1
+       force_recent(:,ia,1) = 0.0d0
+    end if
+
+    if( fix_units ) then
+       do ia=1, 3
+          force_recent(:,QMD%natom+ia,1) = 0.0d0
+       end do
+    end if
+
+    if( loop<gdiis_start_step ) then
        coord_gdiis(:,:) = coord_recent(:,:,1)
        force_gdiis(:,:) = force_recent(:,:,1)
     else
@@ -94,13 +127,25 @@ contains
        ! calc matrix of l.h.s of the linear equation
        do j=1, gdiis_steps
           do i=j, gdiis_steps
-             overlap_ff(i,j) = sum( force_recent(:,:,i)*force_recent(:,:,j) )
+             if( i>loop .or. j>loop ) then
+                if( i== j ) then
+                   overlap_ff(i,j) = 1.0d0
+                else
+                   overlap_ff(i,j) = 0.0d0
+                end if
+             else
+                overlap_ff(i,j) = sum( force_recent(:,:,i)*force_recent(:,:,j) )
+             end if
           end do
        end do
 
        ! calc vector of r.h.s of the linear equation
        do i=1, gdiis_steps
-          beta(i) = 1.0d0
+          if( i>loop ) then
+             beta(i) = 0.0d0
+          else
+             beta(i) = 1.0d0
+          end if
        end do
 
        ! solve the linear equation
@@ -117,6 +162,7 @@ contains
           coord_gdiis(:,:) = coord_gdiis(:,:) + beta(i)*coord_recent(:,:,i)
           force_gdiis(:,:) = force_gdiis(:,:) + beta(i)*force_recent(:,:,i)
        end do
+
        deallocate( overlap_ff, beta )
     end if
 
@@ -165,8 +211,9 @@ contains
     RF(1,size+1,1,size+1) = 0.0d0
 
     ! solve the lowest eigen vector
-    allocate( work(8*(3*size+1)), eigen(3*(size+1)) )
+    allocate( work(8*(3*size+1)), eigen(3*size+1) )
     allocate( iwork(5*(3*size+1)), ifail(3*size+1) )
+
     call dsyevx( 'V', 'I', 'L', 3*size+1, RF, 3*(size+1), &
          0.0d0, 0.0d0, 1, 1, 0.0d0, M, &
          eigen, Z, 3*(size+1), work, 8*(3*size+1), iwork, ifail, info )
@@ -178,36 +225,65 @@ contains
     deallocate( iwork, ifail )
     deallocate( RF, Z )
 
-    ! update coords of unit vectros on the next step
+    ! calc diff of coord of unit vectors on the next step
     do ia=1, 3
-       QMD%uv(:,ia) = coord_gdiis(:,QMD%natom+ia) + coord_bfgs(:,QMD%natom+ia)
+       coord_diff(:,QMD%natom+ia) = &
+            coord_gdiis(:,QMD%natom+ia) + coord_bfgs(:,QMD%natom+ia) &
+            - QMD%uv(:,ia)
     end do
 
     ! calc diff of coord of atoms on the next step
     do ia=1, QMD%natom
-       coord_diff(:,ia) = coord_gdiis(:,ia) + coord_bfgs(:,ia) - QMD%rr(:,ia)
+       coord_diff(:,ia) = coord_gdiis(:,ia) + coord_bfgs(:,ia) - QMD%ra(:,ia)
     end do
 
     ! symmetrize diff of coord of atoms
     if( CIF_canSymmetrize() ) then
+       ! translate from absolute to relative coordinates
+       do ia=1, QMD%natom
+          coord_diff(:,ia) = matmul(coord_diff(:,ia),QMD%bv(:,:))
+       end do
        call CIF_symmetrizeDirection( coord_diff )
+       ! translate from relative to absolute coordinates
+       do ia=1, QMD%natom
+          coord_diff(:,ia) = matmul(QMD%uv(:,:),coord_diff(:,ia))
+       end do
     end if
 
-    ! update coords of atoms on the next step
-    do ia=1, QMD%natom
-       QMD%rr(:,ia) = QMD%rr(:,ia) + coord_diff(:,ia)
+    ! find maximum coord_diff of unit vectors and atoms in absolute coordinates
+    max_diff = maxval(abs(coord_diff(:,:)))
+
+    ! modulation coord_diff if it is too large
+    if( max_diff > criterion_max_diff ) then
+       coord_diff(:,:) = coord_diff(:,:)*(criterion_max_diff/max_diff)
+    end if
+
+    ! update coords of unit vectors on the next step
+    do ia=1, 3
+       if( .not. fix_units ) then
+          QMD%uv(:,ia) = QMD%uv(:,ia) + coord_diff(:,QMD%natom+ia)
+       end if
     end do
 
-    ! update related variables
-    do ia=1, QMD%natom
-       QMD%ra(:,ia) = matmul(QMD%uv(:,:),QMD%rr(:,ia))
-    end do
+    ! update reciprocal vectors
     call cross_x(QMD%uv(:,1),QMD%uv(:,2),QMD%bv(:,3))
     call cross_x(QMD%uv(:,2),QMD%uv(:,3),QMD%bv(:,1))
     call cross_x(QMD%uv(:,3),QMD%uv(:,1),QMD%bv(:,2))
     QMD%omega=dot_product(QMD%bv(:,3),QMD%uv(:,3))
     QMD%omegai=1.d0/QMD%omega
     QMD%bv=QMD%bv*QMD%omegai
+
+    ! update coords of atoms on the next step
+    do ia=1, QMD%natom
+       if( fix_atoms .or. (fix_first_atom.and.ia==1) ) then
+          if( .not. fix_units ) then
+             QMD%ra(:,ia) = matmul(QMD%uv(:,:),QMD%rr(:,ia))
+          end if
+       else
+          QMD%ra(:,ia) = QMD%ra(:,ia) + coord_diff(:,ia)
+          QMD%rr(:,ia) = matmul(QMD%ra(:,ia),QMD%bv(:,:))
+       end if
+    end do
 
     ! clear local arrays
     deallocate( force_diff, coord_diff )
