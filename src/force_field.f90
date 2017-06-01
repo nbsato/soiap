@@ -426,10 +426,13 @@ subroutine ZRL
 ! PRB79, 169904(E) (2009).
 ! Augmented Tersoff potenntial for Si-O
   integer :: ipair,i,j,k,l
+  integer :: jj
   real*8 :: tote,frc(3,QMD%natom),strs(3,3)
-  real*8 :: rri(3),rrj(3),rrk(3)
-  real*8 :: rrij(3),raij(3),dij,rrik(3),raik(3),dik,rrjk(3),rajk(3),djk
+  real*8 :: rri(3),rrj(3)
+  real*8 :: rrij(3),raij(3),dij
+  integer, allocatable :: shiftj(:,:)
   real*8 :: dbdri(3,QMD%natom),dbdrj(3,QMD%natom),dbdrk(3,QMD%natom)
+  real*8 :: dbdrj_raij(3,3,QMD%natom),dbdrk_raik(3,3,QMD%natom)
   real*8 :: ddijdri(3),ddijdrj(3),dvijdri(3),dvijdrj(3)
 ! generalized Morse potential
   real*8 :: totem,frcm(3,QMD%natom),strsm(3,3)
@@ -447,41 +450,42 @@ subroutine ZRL
   frcm=0.d0
   strsm=0.d0
   do i=1,QMD%natom
-  do j=1,QMD%natom
-     if (i==j) cycle
      rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij) ! relative to Cartesian
-     dij=sqrt(sum(raij**2)) ! bond length in Bohr
-     call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
-     if (ipair==0) cycle
-     call ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
-     call ZRL_VR(i,j,dij,fijij,dfijijddij,vr,dvrdd)
-     call ZRL_VA(i,j,dij,fijij,dfijijddij,bijij,va,dvadd,dvadb)
-     vij=vr+va
-     totem=totem+vij*0.5d0
-     call ddijdr(dij,raij,ddijdri,ddijdrj)
-     dvijdri=(dvrdd+dvadd)*ddijdri
-     dvijdrj=(dvrdd+dvadd)*ddijdrj
-     frcm(:,i)=frcm(:,i)-0.5d0*dvijdri
-     frcm(:,j)=frcm(:,j)-0.5d0*dvijdrj
-     do l=1,3
-        strsm(:,l)=strsm(:,l)-0.5d0*dvijdrj*raij(l)
-     enddo
-     do k=1,QMD%natom
-        frcm(:,i)=frcm(:,i)-0.5d0*dvadb*dbdri(:,k)
-        frcm(:,j)=frcm(:,j)-0.5d0*dvadb*dbdrj(:,k)
-        frcm(:,k)=frcm(:,k)-0.5d0*dvadb*dbdrk(:,k)
-        rrk=QMD%rr(:,k)
-        call frac_diff_min(rrk,rri,rrik) ! rrik = rrk - rri
-        raik=matmul(QMD%uv,rrik) ! relative to Cartesian
-        do l=1,3
-           strsm(:,l)=strsm(:,l)-0.5d0*dvadb*dbdrj(:,k)*raij(l) &
-                                -0.5d0*dvadb*dbdrk(:,k)*raik(l)
-        enddo ! l
-     enddo ! k 
-  enddo ! j
+     do j=1,QMD%natom
+        shiftj=periodic_replica(j,i,ZRL_sij(QMD%zatm(i),QMD%zatm(j)))
+        do jj=1,size(shiftj,dim=2)
+           if (j==i.and.all(shiftj(:,jj)==floor(rri(:)))) cycle
+           rrj=shiftj(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij) ! relative to Cartesian
+           dij=sqrt(sum(raij**2)) ! bond length in Bohr
+           call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
+           if (ipair==0) cycle
+           call ZRL_bijij(i,j,shiftj(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
+           call ZRL_VR(i,j,dij,fijij,dfijijddij,vr,dvrdd)
+           call ZRL_VA(i,j,dij,fijij,dfijijddij,bijij,va,dvadd,dvadb)
+           vij=vr+va
+           totem=totem+vij*0.5d0
+           call ddijdr(dij,raij,ddijdri,ddijdrj)
+           dvijdri=(dvrdd+dvadd)*ddijdri
+           dvijdrj=(dvrdd+dvadd)*ddijdrj
+           frcm(:,i)=frcm(:,i)-0.5d0*dvijdri
+           frcm(:,j)=frcm(:,j)-0.5d0*dvijdrj
+           do l=1,3
+              strsm(:,l)=strsm(:,l)-0.5d0*dvijdrj*raij(l)
+           enddo
+           do k=1,QMD%natom
+              frcm(:,i)=frcm(:,i)-0.5d0*dvadb*dbdri(:,k)
+              frcm(:,j)=frcm(:,j)-0.5d0*dvadb*dbdrj(:,k)
+              frcm(:,k)=frcm(:,k)-0.5d0*dvadb*dbdrk(:,k)
+              do l=1,3
+                 strsm(:,l)=strsm(:,l)-0.5d0*dvadb*dbdrj_raij(:,l,k) &
+                       -0.5d0*dvadb*dbdrk_raik(:,l,k)
+              enddo ! l
+           enddo ! k 
+        enddo ! jj
+        deallocate(shiftj)
+     enddo ! j
   enddo ! i
 
 ! core energies, the second term in eq.(E-13)
@@ -498,19 +502,23 @@ subroutine ZRL
   frcp=0.d0
   strsp=0.d0
   do i=1,QMD%natom
-     zi=0.0d0
-  do j=1,QMD%natom
-     if (i==j) cycle
      rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij) ! relative to Cartesian
-     dij=sqrt(sum(raij**2)) ! bond length in Bohr
-     call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
-     if (ipair==0) cycle
-     call ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
-     zi=zi+fijij*bijij
-  enddo ! j   
+     zi=0.0d0
+     do j=1,QMD%natom
+        shiftj=periodic_replica(j,i,ZRL_sij(QMD%zatm(i),QMD%zatm(j)))
+        do jj=1,size(shiftj,dim=2)
+           if (j==i.and.all(shiftj(:,jj)==floor(rri(:)))) cycle
+           rrj=shiftj(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij) ! relative to Cartesian
+           dij=sqrt(sum(raij**2)) ! bond length in Bohr
+           call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
+           if (ipair==0) cycle
+           call ZRL_bijij(i,j,shiftj(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
+           zi=zi+fijij*bijij
+        enddo ! jj
+        deallocate(shiftj)
+     enddo ! j
      ziz0i=zi-ZRL_z0i(QMD%zatm(i))
 ! eq.(15)(17)
      call ZRL_fsz(i,abs(ziz0i),fsz,dfszdz)
@@ -522,41 +530,41 @@ subroutine ZRL
 ! eq.(14)
      eci=ci1*dzi+ci2*dzi**2
      totep=totep+eci
-  do j=1,QMD%natom
-     if (i==j) cycle
-     rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij) ! relative to Cartesian
-     dij=sqrt(sum(raij**2)) ! bond length in Bohr
-     call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
-     if (ipair==0) cycle
-     call ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
+     do j=1,QMD%natom
+        shiftj=periodic_replica(j,i,ZRL_sij(QMD%zatm(i),QMD%zatm(j)))
+        do jj=1,size(shiftj,dim=2)
+           if (j==i.and.all(shiftj(:,jj)==floor(rri(:)))) cycle
+           rrj=shiftj(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij) ! relative to Cartesian
+           dij=sqrt(sum(raij**2)) ! bond length in Bohr
+           call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
+           if (ipair==0) cycle
+           call ZRL_bijij(i,j,shiftj(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
 
-     call ddijdr(dij,raij,ddijdri,ddijdrj)
-     dzidri2=bijij*dfijijddij*ddijdri
-     dzidrj2=bijij*dfijijddij*ddijdrj
+           call ddijdr(dij,raij,ddijdri,ddijdrj)
+           dzidri2=bijij*dfijijddij*ddijdri
+           dzidrj2=bijij*dfijijddij*ddijdrj
 
-     decidzi=(ci1+2.0d0*ci2*dzi)*ddzidzi
-     decidb=decidzi*fijij
-     frcp(:,i)=frcp(:,i)-decidzi*dzidri2
-     frcp(:,j)=frcp(:,j)-decidzi*dzidrj2
-     do l=1,3
-        strsp(:,l)=strsp(:,l)-decidzi*dzidrj2*raij(l)
-     enddo
-     do k=1,QMD%natom
-        frcp(:,i)=frcp(:,i)-decidb*dbdri(:,k)
-        frcp(:,j)=frcp(:,j)-decidb*dbdrj(:,k)
-        frcp(:,k)=frcp(:,k)-decidb*dbdrk(:,k)
-        rrk=QMD%rr(:,k)
-        call frac_diff_min(rrk,rri,rrik) ! rrik = rrk - rri
-        raik=matmul(QMD%uv,rrik) ! relative to Cartesian
-        do l=1,3
-           strsp(:,l)=strsp(:,l)-decidb*dbdrj(:,k)*raij(l) &
-                                -decidb*dbdrk(:,k)*raik(l) 
-        enddo ! l   
-     enddo ! k 
-  enddo ! j   
+           decidzi=(ci1+2.0d0*ci2*dzi)*ddzidzi
+           decidb=decidzi*fijij
+           frcp(:,i)=frcp(:,i)-decidzi*dzidri2
+           frcp(:,j)=frcp(:,j)-decidzi*dzidrj2
+           do l=1,3
+              strsp(:,l)=strsp(:,l)-decidzi*dzidrj2*raij(l)
+           enddo
+           do k=1,QMD%natom
+              frcp(:,i)=frcp(:,i)-decidb*dbdri(:,k)
+              frcp(:,j)=frcp(:,j)-decidb*dbdrj(:,k)
+              frcp(:,k)=frcp(:,k)-decidb*dbdrk(:,k)
+              do l=1,3
+                 strsp(:,l)=strsp(:,l)-decidb*dbdrj_raij(:,l,k) &
+                                      -decidb*dbdrk_raik(:,l,k)
+              enddo ! l
+           enddo ! k
+        enddo ! jj
+        deallocate(shiftj)
+     enddo ! j
   enddo ! i   
 
   QMD%tote=totem+totec+totep
@@ -613,18 +621,23 @@ subroutine ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
    endif   
 end subroutine ZRL_fijij
 
-subroutine ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
+subroutine ZRL_bijij(i,j,shiftj,bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
 ! eq.(6) in PRB73,155329(2006)
    implicit none
    real(8) :: bijij,pi
    real(8) :: dbdri(3,QMD%natom),dbdrj(3,QMD%natom),dbdrk(3,QMD%natom)
+   real(8) :: dbdrj_raij(3,3,QMD%natom),dbdrk_raik(3,3,QMD%natom)
    real(8) :: rri(3),rrj(3),rrk(3),rrij(3),rrik(3),raij(3),raik(3)
+   integer :: shiftj(3)
+   integer, allocatable :: shiftk(:,:)
    real(8) :: dij,dik,cosjik,fikik,eijkijk,tijki,ztijij,chiij,betai,ni
    real(8) :: dfikikddik,deddij,deddik,dbijijdztij
    real(8) :: dcdri(3),dcdrj(3),dcdrk(3)
    real(8) :: ddijdri(3),ddijdrj(3),ddikdri(3),ddikdrk(3)
    real(8) :: dztijijddij,dztijijddik,dztijijdcos,dtijkidcos
+   real(8) :: tempj(3),tempk(3)
    integer :: ipair,i,j,k,zi,zj
+   integer :: kk,l
 
 !   pi=4.0d0*atan(1.0d0)
    zi=QMD%zatm(i)
@@ -637,38 +650,50 @@ subroutine ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
    dbdrj=0.0d0
    dbdrk=0.0d0
    ztijij=0.0d0
-
-      rri=QMD%rr(:,i)
-      rrj=QMD%rr(:,j)
-      call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-      raij=matmul(QMD%uv,rrij) ! relative to Cartesian
-      dij=sqrt(sum(raij**2)) ! bond length in Bohr
+   dbdrj_raij=0.0d0
+   dbdrk_raik=0.0d0
+   rri=QMD%rr(:,i)
+   rrj=shiftj(:)+modulo(QMD%rr(:,j),1.0d0)
+   rrij=rrj(:)-rri(:)
+   raij=matmul(QMD%uv,rrij) ! relative to Cartesian
+   dij=sqrt(sum(raij**2)) ! bond length in Bohr
 
    do k=1,QMD%natom
-      if (k==i.or.k==j) cycle
-!      rri=QMD%rr(:,i)
-      rrk=QMD%rr(:,k)
-      call frac_diff_min(rrk,rri,rrik) ! rrik = rrk - rri
-      raik=matmul(QMD%uv,rrik) ! relative to Cartesian
-      dik=sqrt(sum(raik**2)) ! bond length in Bohr
- 
-      cosjik=dot_product(raij,raik)/(dij*dik)
+      shiftk=periodic_replica(k,i,ZRL_sij(zi,QMD%zatm(k)))
+      do kk=1,size(shiftk,dim=2)
+         if (k==i.and.all(shiftk(:,kk)==floor(rri(:)))) cycle
+         if (k==j.and.all(shiftk(:,kk)==shiftj(:))) cycle
+         rrk=shiftk(:,kk)+modulo(QMD%rr(:,k),1.0d0)
+         rrik=rrk(:)-rri(:)
+         raik=matmul(QMD%uv,rrik) ! relative to Cartesian
+         dik=sqrt(sum(raik**2)) ! bond length in Bohr
 
-      call ZRL_fijij(i,k,dik,fikik,dfikikddik,ipair) ! eq.(3)
-      if (ipair==0) cycle
-      call ZRL_eijkijk(i,j,k,dij,dik,eijkijk,deddij,deddik) ! eq.(11)
-      call ZRL_tijki(i,cosjik,tijki,dtijkidcos) ! eq.(8)
-      ztijij=ztijij+fikik*eijkijk*tijki ! eq.(7)
-      dztijijddij=fikik*deddij*tijki
-      dztijijddik=fikik*deddik*tijki+dfikikddik*eijkijk*tijki
-      dztijijdcos=fikik*eijkijk*dtijkidcos
+         cosjik=dot_product(raij,raik)/(dij*dik)
 
-      call ddijdr(dij,raij,ddijdri,ddijdrj)
-      call ddijdr(dik,raik,ddikdri,ddikdrk)
-      call dcosjikdr(raij,raik,dij,dik,cosjik,dcdri,dcdrj,dcdrk)
-      dbdri(:,k)=dztijijddij*ddijdri+dztijijddik*ddikdri+dztijijdcos*dcdri
-      dbdrj(:,k)=dztijijddij*ddijdrj                    +dztijijdcos*dcdrj
-      dbdrk(:,k)=                    dztijijddik*ddikdrk+dztijijdcos*dcdrk
+         call ZRL_fijij(i,k,dik,fikik,dfikikddik,ipair) ! eq.(3)
+         if (ipair==0) cycle
+         call ZRL_eijkijk(i,j,k,dij,dik,eijkijk,deddij,deddik) ! eq.(11)
+         call ZRL_tijki(i,cosjik,tijki,dtijkidcos) ! eq.(8)
+         ztijij=ztijij+fikik*eijkijk*tijki ! eq.(7)
+         dztijijddij=fikik*deddij*tijki
+         dztijijddik=fikik*deddik*tijki+dfikikddik*eijkijk*tijki
+         dztijijdcos=fikik*eijkijk*dtijkidcos
+
+         call ddijdr(dij,raij,ddijdri,ddijdrj)
+         call ddijdr(dik,raik,ddikdri,ddikdrk)
+         call dcosjikdr(raij,raik,dij,dik,cosjik,dcdri,dcdrj,dcdrk)
+         dbdri(:,k)=dbdri(:,k)+dztijijddij*ddijdri+dztijijddik*ddikdri+dztijijdcos*dcdri
+         tempj     =           dztijijddij*ddijdrj                    +dztijijdcos*dcdrj
+         tempk     =                              +dztijijddik*ddikdrk+dztijijdcos*dcdrk
+         dbdrj(:,k)=dbdrj(:,k)+tempj(:)
+         dbdrk(:,k)=dbdrk(:,k)+tempk(:)
+
+         do l=1,3
+            dbdrj_raij(:,l,k)=dbdrj_raij(:,l,k)+tempj(:)*raij(l)
+            dbdrk_raik(:,l,k)=dbdrk_raik(:,l,k)+tempk(:)*raik(l)
+         enddo ! l
+      enddo ! kk
+      deallocate(shiftk)
    enddo ! k   
 
    bijij=chiij*(1.0d0+(betai*ztijij)**ni)**(-0.5d0/ni)
@@ -677,6 +702,8 @@ subroutine ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
    dbdri=dbijijdztij*dbdri
    dbdrj=dbijijdztij*dbdrj
    dbdrk=dbijijdztij*dbdrk
+   dbdrj_raij=dbijijdztij*dbdrj_raij
+   dbdrk_raik=dbijijdztij*dbdrk_raik
 
 end subroutine ZRL_bijij
 
@@ -995,6 +1022,12 @@ real(8) function ZRL_si(z)
   endif
   ZRL_si=ZRL_si/bohr ! Ang to Bohr
 end function ZRL_si
+
+real(8) function ZRL_sij(zi,zj)
+   implicit none
+   integer, intent(in) :: zi,zj
+   ZRL_sij=sqrt(ZRL_si(zi)*ZRL_si(zj))
+end function ZRL_sij
 
 real(8) function ZRL_betai(z)
   implicit none
