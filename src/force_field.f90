@@ -1185,6 +1185,10 @@ function periodic_replica(i,i0,rcut) result(shift_replica)
   ! 1/8 size of a supercell circumscribing a sphere of radius 'rcut'
   cell_cut(:) = sqrt(sum(QMD%bv**2,dim=1))*rcut
 
+  if (any_overflow_integer(QMD%rr(:,i0)-cell_cut(:)) &
+      .or.any_overflow_integer(QMD%rr(:,i0)+cell_cut(:))) then
+     stop 'periodic_replica error: integer overflow'
+  endif
   s_min(:) = floor(QMD%rr(:,i0)-cell_cut(:))
   s_max(:) = floor(QMD%rr(:,i0)+cell_cut(:))
 
@@ -1217,5 +1221,29 @@ function periodic_replica(i,i0,rcut) result(shift_replica)
   shift_replica = shift_replica(:,1:num_replica)
 
 end function periodic_replica
+
+logical function any_overflow_integer(rarr)
+  implicit none
+  real(8), intent(in) :: rarr(:)
+  integer :: k
+
+  do k=1,size(rarr)
+     if (overflow_integer(rarr(k))) then
+        any_overflow_integer = .true.
+        return
+     endif
+  enddo
+  any_overflow_integer = .false.
+
+end function any_overflow_integer
+
+logical function overflow_integer(r)
+  implicit none
+  real(8), intent(in) :: r
+  integer :: int
+
+  overflow_integer = r<-dble(huge(int))-1.or.huge(int)<r
+
+end function overflow_integer
 
 end module
