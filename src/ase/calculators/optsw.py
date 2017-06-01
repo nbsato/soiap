@@ -1,5 +1,7 @@
 """ OptSW potential."""
 
+# [note] set environmental variable OPTSW_COMMAND for opt2 command
+
 import os
 import numpy as np
 
@@ -49,10 +51,16 @@ class OptSW(Calculator):
             constraint_indices.extend(c.index)
         # end for
 
+        numbers_uniq = np.unique(numbers)
+        numbers_index = {}
+        for e in range(len(numbers_uniq)):
+            numbers_index[numbers_uniq[e]] = e+1
+        # end for
+
         # write data to the input file
         fd = open( "input", "w" )
         fd.write("number_atom    %d\n" % len(self.atoms) )
-        fd.write("number_element %d\n" % len(np.unique(numbers)) )
+        fd.write("number_element %d\n" % len(numbers_uniq) )
         fd.write("\n")
 
         fd.write("unit_vec\n")
@@ -68,8 +76,9 @@ class OptSW(Calculator):
 
         fd.write("atom_list\n")
         for a in range(len(self.atoms)):
-            fd.write("%2d %f %f %f 1 %d ! %s\n" %
+            fd.write("%2d %f %f %f %d %d ! %s\n" %
               (numbers[a], positions[a][0], positions[a][1], positions[a][2],
+               numbers_index[numbers[a]],
                a not in constraint_indices, symbols[a] ) )
         # end for
         fd.write("\n")
@@ -119,7 +128,7 @@ class OptSW(Calculator):
     #---- read cell and positions
     def read_struct(self):
         # init local variable
-        cell = []
+        cell = [[0,0,0],[0,0,0],[0,0,0]]
         positions = []
 
         # get the latest values
@@ -127,23 +136,25 @@ class OptSW(Calculator):
         line = fd.readline()
         while line:
             if line.find("*** unit vectors [Bohr]:") != -1:
-                cell = []
                 positions = []
 
                 line = fd.readline()
                 terms = line.split()
-                vector = [ float(terms[0]), float(terms[1]), float(terms[2]) ]
-                cell.append(vector)
+                cell[0][0] = float(terms[0])
+                cell[1][0] = float(terms[1])
+                cell[2][0] = float(terms[2])
 
                 line = fd.readline()
                 terms = line.split()
-                vector = [ float(terms[0]), float(terms[1]), float(terms[2]) ]
-                cell.append(vector)
+                cell[0][1] = float(terms[0])
+                cell[1][1] = float(terms[1])
+                cell[2][1] = float(terms[2])
 
                 line = fd.readline()
                 terms = line.split()
-                vector = [ float(terms[0]), float(terms[1]), float(terms[2]) ]
-                cell.append(vector)
+                cell[0][2] = float(terms[0])
+                cell[1][2] = float(terms[1])
+                cell[2][2] = float(terms[2])
 
                 line = fd.readline() # skip messeges ...
                 for a in range(len(self.atoms)):
