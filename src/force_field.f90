@@ -13,7 +13,7 @@ subroutine Stillinger_Weber
   real*8 :: tote2,tote3,frc2(3,QMD%natom),frc3(3,QMD%natom),strs2(3,3),strs3(3,3)
   real*8 :: rri(3),rrj(3),rrk(3)
   real*8 :: rrij(3),raij(3),dij,rrik(3),raik(3),rrjk(3),rajk(3)
-  real*8 :: toteij,frcijr,toteijk,frcijk(3,3),vtmp(3)
+  real*8 :: toteij,frcijr,toteijk,frcijk(3,3),vtmp(3),strsijk(3,3)
   integer, allocatable :: shiftj(:,:),shiftk(:,:)
 ! debug:
   real*8 :: a_cut
@@ -39,6 +39,10 @@ subroutine Stillinger_Weber
            dij=sqrt(sum(raij**2))
            if (QMD%zatm(i)==14.and.QMD%zatm(j)==14) &
            call SW_Si_2body(dij,toteij,frcijr)
+           if (i==j) then
+              toteij=toteij/2.0d0
+              frcijr=frcijr/2.0d0
+           endif
            tote2=tote2+toteij
            vtmp= frcijr*raij(:)/dij
            frc2(:,i)= frc2(:,i)-vtmp
@@ -69,18 +73,28 @@ subroutine Stillinger_Weber
               shiftk=periodic_replica(k,i,2*a_cut*sigma) ! interaction range is twice the cutoff radius
               do kk=1,size(shiftk,dim=2)
                  if (k==i.and.all(shiftk(:,kk)==floor(rri(:)))) cycle
-                 if (k==j.and.kk<=jj) cycle
+                 if (k==j.and.kk==jj) cycle
                  rrk=shiftk(:,kk)+modulo(QMD%rr(:,k),1.0d0)
                  rrik=rrk(:)-rri(:)
                  raik=matmul(QMD%uv,rrik)
                  rrjk=rrk(:)-rrj(:)
                  rajk=matmul(QMD%uv,rrjk)
                  if (QMD%zatm(i)==14.and.QMD%zatm(j)==14.and.QMD%zatm(k)==14) &
-                 call SW_Si_3body(raij,raik,rajk,toteijk,frcijk,strs3)
+                 call SW_Si_3body(raij,raik,rajk,toteijk,frcijk,strsijk)
+                 if ((i==j.and.k/=i).or.(j==k.and.i/=j).or.(k==i.and.j/=k)) then
+                    toteijk=toteijk/2.0d0
+                    frcijk=frcijk/2.0d0
+                    strsijk=strsijk/2.0d0
+                 elseif (i==j.and.j==k) then
+                    toteijk=toteijk/6.0d0
+                    frcijk=frcijk/6.0d0
+                    strsijk=strsijk/6.0d0
+                 endif
                  tote3=tote3+toteijk
                  frc3(:,i)= frc3(:,i)+frcijk(:,1)
                  frc3(:,j)= frc3(:,j)+frcijk(:,2)
                  frc3(:,k)= frc3(:,k)+frcijk(:,3)
+                 strs3=strs3+strsijk
               enddo ! kk
               deallocate(shiftk)
            enddo ! k
@@ -154,6 +168,7 @@ subroutine SW_Si_3body(r12,r13,r23,tote3,frc3,strs3)
 
   tote3=0.d0
   frc3=0.d0
+  strs3=0.d0
    
   if (d12<a_cut.and.d13<a_cut) then
 !     v1=-s12
