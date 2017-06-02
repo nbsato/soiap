@@ -1,0 +1,8 @@
+set xla "loop cell"
+set yla "total energy"
+set grid
+
+plot   "log.tote.orig" u 1:3 w lp t "original"
+replot "log.tote.rfc5" u 1:3 w lp t "RFC5"
+
+pause -1 ""

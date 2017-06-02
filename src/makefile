@@ -3,36 +3,25 @@
 
 include make.inc
 
-OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o
+OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o rfc5.o cif.o opt2_o_addtime.o
 
 .f.o:
-	$(FC) -c -o $@ $(FFLAGS_fixed) $*.f  -Iselect
+	$(FC) -c -o $@ $(FFLAGS_fixed) $*.f
 .f90.o:
-	$(FC) -c -o $@ $(FFLAGS_free) $*.f90  -Iselect 
+	$(FC) -c -o $@ $(FFLAGS_free) $*.f90
 .F.o:
-	$(FC) -c -o $@ $(FFLAGS_fixed) $*.F  -Iselect 
+	$(FC) -c -o $@ $(FFLAGS_fixed) $*.F
 
 all: opt2_o
 
-opt2_o: opt2_o.o $(OBJS_o)
+opt2_o: $(OBJS_o)
 	$(FC) -o $@  $^ $(LIBS)
-
-opt2_o.o: $(OBJS_o)  opt2_o_addtime.f90
-	$(FC) -c -o $@  $(FFLAGS_free)  opt2_o_addtime.f90 
-opt2_o_addtime.f90: opt2_o.f90
-	awk -f converttool/addtime.awk opt2_o.f90 > opt2_o_addtime.f90
-
-algebra.o: algebra.f90
 
 atomrelax_o.o: parms_o.o 
 
 force_field.o: parms_o.o algebra.o
 
-input.o: keyvalue.o parms_o.o
-
-keyvalue.o: keyvalue.F
-
-parms_o.o: parms_o.f90
+input.o: keyvalue.o parms_o.o cif.o
 
 structure_opt.o: parms_o.o 
 
