@@ -165,7 +165,11 @@ subroutine input
   call getkeyvalue(inputfilename,"cut_force",QMD%fcut,default=5.d-1)
   write(*,*)'cut_force =',QMD%fcut
 
-  call getkeyvalue(inputfilename,"max_displacement",QMD%rdmax,default=0.25d0)
+  if (QMD%imdc==3) then ! RFC5
+     call getkeyvalue(inputfilename,"max_displacement",QMD%rdmax,default=0.10d0)
+  else
+     call getkeyvalue(inputfilename,"max_displacement",QMD%rdmax,default=0.25d0)
+  endif
   write(*,*)'max_displacement [Bohr] =',QMD%rdmax
 
   call getkeyvalue(inputfilename,"mass_scale",mscale,default=0)

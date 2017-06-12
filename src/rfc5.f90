@@ -9,7 +9,6 @@ module rfc5
   logical, parameter :: fix_units = .false.  ! fix unit vectors for debug
   integer, parameter :: gdiis_start_step = 2 ! start of GDIIS steps
   integer, parameter :: gdiis_steps = 6      ! depth of GDIIS steps
-  real(8), parameter :: criterion_max_diff = 0.10d0 ! modulation criterion for diff[Bohr]
 
   ! module arrays for optimization history
   real(8), allocatable :: coord_recent(:,:,:)
@@ -254,8 +253,8 @@ contains
     max_diff = maxval(abs(coord_diff(:,:)))
 
     ! modulation coord_diff if it is too large
-    if( max_diff > criterion_max_diff ) then
-       coord_diff(:,:) = coord_diff(:,:)*(criterion_max_diff/max_diff)
+    if( max_diff > QMD%rdmax ) then
+       coord_diff(:,:) = coord_diff(:,:)*(QMD%rdmax/max_diff)
     end if
 
     ! update coords of unit vectors on the next step
