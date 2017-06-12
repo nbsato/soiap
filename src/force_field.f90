@@ -447,7 +447,7 @@ subroutine ZRL
   real*8 :: rrij(3),raij(3),dij
   integer, allocatable :: shiftj(:,:)
   real*8 :: dbdri(3,QMD%natom),dbdrj(3,QMD%natom),dbdrk(3,QMD%natom)
-  real*8 :: dbdrj_raij(3,3,QMD%natom),dbdrk_raik(3,3,QMD%natom)
+  real*8 :: dbdrk_raik(3,3,QMD%natom)
   real*8 :: ddijdri(3),ddijdrj(3),dvijdri(3),dvijdrj(3)
 ! generalized Morse potential
   real*8 :: totem,frcm(3,QMD%natom),strsm(3,3)
@@ -476,7 +476,7 @@ subroutine ZRL
            dij=sqrt(sum(raij**2)) ! bond length in Bohr
            call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
            if (ipair==0) cycle
-           call ZRL_bijij(i,j,shiftj(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
+           call ZRL_bijij(i,j,shiftj(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrk_raik)
            call ZRL_VR(i,j,dij,fijij,dfijijddij,vr,dvrdd)
            call ZRL_VA(i,j,dij,fijij,dfijijddij,bijij,va,dvadd,dvadb)
            vij=vr+va
@@ -494,7 +494,7 @@ subroutine ZRL
               frcm(:,j)=frcm(:,j)-0.5d0*dvadb*dbdrj(:,k)
               frcm(:,k)=frcm(:,k)-0.5d0*dvadb*dbdrk(:,k)
               do l=1,3
-                 strsm(:,l)=strsm(:,l)-0.5d0*dvadb*dbdrj_raij(:,l,k) &
+                 strsm(:,l)=strsm(:,l)-0.5d0*dvadb*dbdrj(:,k)*raij(l) &
                        -0.5d0*dvadb*dbdrk_raik(:,l,k)
               enddo ! l
            enddo ! k 
@@ -529,7 +529,7 @@ subroutine ZRL
            dij=sqrt(sum(raij**2)) ! bond length in Bohr
            call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
            if (ipair==0) cycle
-           call ZRL_bijij(i,j,shiftj(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
+           call ZRL_bijij(i,j,shiftj(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrk_raik)
            zi=zi+fijij*bijij
         enddo ! jj
         deallocate(shiftj)
@@ -555,7 +555,7 @@ subroutine ZRL
            dij=sqrt(sum(raij**2)) ! bond length in Bohr
            call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
            if (ipair==0) cycle
-           call ZRL_bijij(i,j,shiftj(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
+           call ZRL_bijij(i,j,shiftj(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrk_raik)
 
            call ddijdr(dij,raij,ddijdri,ddijdrj)
            dzidri2=bijij*dfijijddij*ddijdri
@@ -573,7 +573,7 @@ subroutine ZRL
               frcp(:,j)=frcp(:,j)-decidb*dbdrj(:,k)
               frcp(:,k)=frcp(:,k)-decidb*dbdrk(:,k)
               do l=1,3
-                 strsp(:,l)=strsp(:,l)-decidb*dbdrj_raij(:,l,k) &
+                 strsp(:,l)=strsp(:,l)-decidb*dbdrj(:,k)*raij(l) &
                                       -decidb*dbdrk_raik(:,l,k)
               enddo ! l
            enddo ! k
@@ -636,12 +636,12 @@ subroutine ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
    endif   
 end subroutine ZRL_fijij
 
-subroutine ZRL_bijij(i,j,shiftj,bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
+subroutine ZRL_bijij(i,j,shiftj,bijij,dbdri,dbdrj,dbdrk,dbdrk_raik)
 ! eq.(6) in PRB73,155329(2006)
    implicit none
    real(8) :: bijij,pi
    real(8) :: dbdri(3,QMD%natom),dbdrj(3,QMD%natom),dbdrk(3,QMD%natom)
-   real(8) :: dbdrj_raij(3,3,QMD%natom),dbdrk_raik(3,3,QMD%natom)
+   real(8) :: dbdrk_raik(3,3,QMD%natom)
    real(8) :: rri(3),rrj(3),rrk(3),rrij(3),rrik(3),raij(3),raik(3)
    integer :: shiftj(3)
    integer, allocatable :: shiftk(:,:)
@@ -650,7 +650,7 @@ subroutine ZRL_bijij(i,j,shiftj,bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
    real(8) :: dcdri(3),dcdrj(3),dcdrk(3)
    real(8) :: ddijdri(3),ddijdrj(3),ddikdri(3),ddikdrk(3)
    real(8) :: dztijijddij,dztijijddik,dztijijdcos,dtijkidcos
-   real(8) :: tempj(3),tempk(3)
+   real(8) :: tempk(3)
    integer :: ipair,i,j,k,zi,zj
    integer :: kk,l
 
@@ -665,7 +665,6 @@ subroutine ZRL_bijij(i,j,shiftj,bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
    dbdrj=0.0d0
    dbdrk=0.0d0
    ztijij=0.0d0
-   dbdrj_raij=0.0d0
    dbdrk_raik=0.0d0
    rri=QMD%rr(:,i)
    rrj=shiftj(:)+modulo(QMD%rr(:,j),1.0d0)
@@ -698,13 +697,11 @@ subroutine ZRL_bijij(i,j,shiftj,bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
          call ddijdr(dik,raik,ddikdri,ddikdrk)
          call dcosjikdr(raij,raik,dij,dik,cosjik,dcdri,dcdrj,dcdrk)
          dbdri(:,k)=dbdri(:,k)+dztijijddij*ddijdri+dztijijddik*ddikdri+dztijijdcos*dcdri
-         tempj     =           dztijijddij*ddijdrj                    +dztijijdcos*dcdrj
+         dbdrj(:,k)=dbdrj(:,k)+dztijijddij*ddijdrj                    +dztijijdcos*dcdrj
          tempk     =                              +dztijijddik*ddikdrk+dztijijdcos*dcdrk
-         dbdrj(:,k)=dbdrj(:,k)+tempj(:)
          dbdrk(:,k)=dbdrk(:,k)+tempk(:)
 
          do l=1,3
-            dbdrj_raij(:,l,k)=dbdrj_raij(:,l,k)+tempj(:)*raij(l)
             dbdrk_raik(:,l,k)=dbdrk_raik(:,l,k)+tempk(:)*raik(l)
          enddo ! l
       enddo ! kk
@@ -717,7 +714,6 @@ subroutine ZRL_bijij(i,j,shiftj,bijij,dbdri,dbdrj,dbdrk,dbdrj_raij,dbdrk_raik)
    dbdri=dbijijdztij*dbdri
    dbdrj=dbijijdztij*dbdrj
    dbdrk=dbijijdztij*dbdrk
-   dbdrj_raij=dbijijdztij*dbdrj_raij
    dbdrk_raik=dbijijdztij*dbdrk_raik
 
 end subroutine ZRL_bijij
