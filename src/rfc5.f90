@@ -5,8 +5,6 @@ module rfc5
 
   ! parameters for optimization
   logical, parameter :: fix_first_atom = .false. ! fix coords of the first atom for debug
-  logical, parameter :: fix_atoms = .false.  ! fix atoms coords for debug
-  logical, parameter :: fix_units = .false.  ! fix unit vectors for debug
   integer, parameter :: gdiis_start_step = 2 ! start of GDIIS steps
   integer, parameter :: gdiis_steps = 6      ! depth of GDIIS steps
 
@@ -17,8 +15,10 @@ module rfc5
 
 contains
   ! optimize atom coordinates and cell vectors
-  subroutine updt_coordcell_RFC5( loop )
+  subroutine updt_coordcell_RFC5( loop, updt_coord, updt_cell )
     integer, intent(in) :: loop ! optimization iteration
+    logical, intent(in) :: updt_coord
+    logical, intent(in) :: updt_cell
 
     integer :: size ! total size of positions
     integer :: i, j, k, ia
@@ -103,7 +103,7 @@ contains
        force_recent(:,QMD%natom+ia,1) = QMD%omega * matmul( QMD%strs(:,:), QMD%bv(:,ia) )
     end do
 
-    if( fix_atoms ) then
+    if( .not. updt_coord ) then
        do ia=1, QMD%natom
           force_recent(:,ia,1) = 0.0d0
        end do
@@ -112,7 +112,7 @@ contains
        force_recent(:,ia,1) = 0.0d0
     end if
 
-    if( fix_units ) then
+    if( .not. updt_cell ) then
        do ia=1, 3
           force_recent(:,QMD%natom+ia,1) = 0.0d0
        end do
@@ -259,7 +259,7 @@ contains
 
     ! update coords of unit vectors on the next step
     do ia=1, 3
-       if( .not. fix_units ) then
+       if( updt_cell ) then
           QMD%uv(:,ia) = QMD%uv(:,ia) + coord_diff(:,QMD%natom+ia)
        end if
     end do
@@ -274,8 +274,8 @@ contains
 
     ! update coords of atoms on the next step
     do ia=1, QMD%natom
-       if( fix_atoms .or. (fix_first_atom.and.ia==1) ) then
-          if( .not. fix_units ) then
+       if( (.not.updt_coord) .or. (fix_first_atom.and.ia==1) ) then
+          if( updt_cell ) then
              QMD%ra(:,ia) = matmul(QMD%uv(:,:),QMD%rr(:,ia))
           end if
        else

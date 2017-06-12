@@ -52,32 +52,47 @@ program main
 
      call strs_max
   else if( QMD%imdc == 3 ) then
-     do loopc=1,QMD%nloopc*QMD%nloopa
+     do loopc=1,QMD%nloopc
         QMD%loopc=loopc
-        QMD%loopa=loopc
-        call timer%start()
-        call tote_frc_strs
-        call timer%stop()
-        call timer%show("tote_frc_strs:")
+        do loopa=1,QMD%nloopa
+           QMD%loopa=loopa
+           write(6,*)'QMD%loopc,QMD%loopa=',QMD%loopc,QMD%loopa,' out of ', &
+                QMD%nloopc,QMD%nloopa
 
-        do i=1,3
-           QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
+           call timer%start()
+           call tote_frc_strs
+           call timer%stop()
+           call timer%show("tote_frc_strs:")
+
+           do i=1,3
+              QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
+           enddo
+
+           call output_struc(901)
+           call output_tote(902)
+
+           if (QMD%fmax<QMD%fth) then
+              write(*,'("QMD%frc converged. QMD%loopc, QMD%loopa, QMD%smax, QMD%fmax",2i5,e12.4)') &
+                   QMD%loopc,QMD%loopa,QMD%fmax
+              exit
+           endif
+
+           if (loopa/=QMD%nloopa) then
+              call updt_coordcell_RFC5((QMD%loopc-1)*QMD%nloopa+QMD%loopa,.true.,.false.)
+           endif
         enddo
 
-        call output_struc(901)
-        call output_tote(902)
         call output_frc(903)
         call output_strs(904)
 
         call strs_max
-
-        if ( QMD%fmax<QMD%fth .and. QMD%smax<QMD%sth) then
-           write(*,'("QMD%frc converged. loop,QMD%smax,QMD%fmax",i5,2e12.4)') &
-                loopc,QMD%smax,QMD%fmax
-           exit
+        if (QMD%smax<QMD%sth) then
+           write(*,'("QMD%strs converged. QMD%loopc, QMD%smax",i5,e12.4)') &
+                 QMD%loopc,QMD%smax
+           if (QMD%fmax<QMD%fth) exit
         endif
 
-        call updt_coordcell_RFC5(loopc)
+        call updt_coordcell_RFC5((QMD%loopc-1)*QMD%nloopa+QMD%loopa,.true.,.true.)
      enddo
   else
      QMD%uvo(:,:,1)=QMD%uv
