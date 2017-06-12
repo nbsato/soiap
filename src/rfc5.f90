@@ -280,7 +280,7 @@ contains
              QMD%ra(:,ia) = matmul(QMD%uv(:,:),QMD%rr(:,ia))
           end if
        else
-          QMD%ra(:,ia) = QMD%ra(:,ia) + coord_diff(:,ia)
+          QMD%ra(:,ia) = matmul(QMD%uv(:,:),QMD%rr(:,ia)) + coord_diff(:,ia)
           QMD%rr(:,ia) = matmul(QMD%ra(:,ia),QMD%bv(:,:))
        end if
     end do
