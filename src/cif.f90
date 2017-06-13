@@ -624,7 +624,7 @@ contains
 
              column = column + 1
              select case(tag)
-             case("_symmetry_equiv_pos_as_xyz")
+             case("_symmetry_equiv_pos_as_xyz","_space_group_symop_operation_xyz")
                 column_xyz = column
                 loop_symm = .true.
 
