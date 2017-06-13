@@ -190,13 +190,22 @@ contains
        prod_rd = sum(coord_diff(:,:)*direc_diff(:,:))
 
        ! update the hessian
-       do ia=1, size
-          do k=1, 3
-             Hessian(k,ia,:,:) = Hessian(k,ia,:,:) &
-                  - (force_diff(k,ia)/prod_rf) * force_diff(:,:) &
-                  - (direc_diff(k,ia)/prod_rd) * direc_diff(:,:)
+       if( prod_rf /= 0.0d0 ) then
+          do ia=1, size
+             do k=1, 3
+                Hessian(k,ia,:,:) = Hessian(k,ia,:,:) &
+                     - (force_diff(k,ia)/prod_rf) * force_diff(:,:)
+             end do
           end do
-       end do
+       end if
+       if( prod_rd /= 0.0d0 ) then
+          do ia=1, size
+             do k=1, 3
+                Hessian(k,ia,:,:) = Hessian(k,ia,:,:) &
+                     - (direc_diff(k,ia)/prod_rd) * direc_diff(:,:)
+             end do
+          end do
+       end if
     end if
 
     !---- RF stage
@@ -218,7 +227,11 @@ contains
          eigen, Z, 3*(size+1), work, 8*(3*size+1), iwork, ifail, info )
 
     ! normalize eigen vector as ( vec{coord_bfgs}, 1 )
-    coord_bfgs(:,:) = Z(:,1:size,1)*(1.0d0/Z(1,size+1,1))
+    if( Z(1,size+1,1) == 0.0d0 ) then
+       coord_bfgs(:,:) = 0.0d0
+    else
+       coord_bfgs(:,:) = Z(:,1:size,1)*(1.0d0/Z(1,size+1,1))
+    end if
 
     deallocate( work, eigen )
     deallocate( iwork, ifail )
