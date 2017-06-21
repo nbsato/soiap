@@ -149,7 +149,6 @@ program main
      enddo ! QMD%loopc
   end if ! imdc /= 3
 
-  call output_struc(901)
   close(901)
   close(902)
   close(903)
