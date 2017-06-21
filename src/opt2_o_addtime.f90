@@ -48,12 +48,12 @@ program main
         QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
      enddo
 
+     call strs_max
+
      call output_struc(901)
      call output_tote(902)
      call output_frc(903)
      call output_strs(904)
-
-     call strs_max
   else if( QMD%imdc == 3 ) then
      do loopc=1,QMD%nloopc
         QMD%loopc=loopc
@@ -85,10 +85,11 @@ program main
            endif
         enddo
 
+        call strs_max
+
         call output_frc(903)
         call output_strs(904)
 
-        call strs_max
         if (QMD%smax<QMD%sth) then
            write(*,'("QMD%strs converged. QMD%loopc, QMD%smax",i5,e12.4)') &
                  QMD%loopc,QMD%smax
