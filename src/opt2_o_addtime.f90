@@ -36,6 +36,9 @@ program main
   endif
 
   if( QMD%imd == 1 .and. QMD%imdc == 1 ) then
+     QMD%loopc=1
+     QMD%loopa=1
+
      call timer%start()
      call tote_frc_strs
      call timer%stop()
@@ -72,7 +75,7 @@ program main
            call output_tote(902)
 
            if (QMD%fmax<QMD%fth) then
-              write(*,'("QMD%frc converged. QMD%loopc, QMD%loopa, QMD%smax, QMD%fmax",2i5,e12.4)') &
+              write(*,'("QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax",2i5,e12.4)') &
                    QMD%loopc,QMD%loopa,QMD%fmax
               exit
            endif
@@ -138,7 +141,7 @@ program main
         if (QMD%smax<QMD%sth) then
            write(*,'("QMD%strs converged. QMD%loopc, QMD%smax",i5,e12.4)')&
                 QMD%loopc,QMD%smax
-           exit
+           if (QMD%fmax<QMD%fth) exit
         endif
 
         call updt_velocity_cell
@@ -148,7 +151,7 @@ program main
   call output_struc(901)
   close(901)
   close(902)
-  !  close(903)
+  close(903)
   close(904)
 
   write(*,*)'*** QMD%loopc =',QMD%loopc
@@ -156,7 +159,7 @@ program main
        QMD%tote,QMD%fmax,&
        QMD%tote/QMD%natom,QMD%omega*((bohr)**3),QMD%omega*(bohr**3)/QMD%natom 
 
-  write(6,*)'!!!! normaly end !!!!'
+  write(6,*)'!!!! normally end !!!!'
 
 contains
 
