@@ -18,43 +18,22 @@ program main
 
   call input
 
-  if (QMD%imd/=0.and.QMD%imd/=1.and.abs(QMD%imd)/=3.and.abs(QMD%imd)/=4) then
-     write(*,*)'md_mode should be 0, 1, 3 or 4'
+  if (QMD%imd/=0.and.abs(QMD%imd)/=3.and.abs(QMD%imd)/=4) then
+     write(*,*)'md_mode should be 0, 3 or 4'
      write(*,*)'md_mode=0: FIRE mode'
-     write(*,*)'md_mode=1: no md'
      write(*,*)'md_mode=3: simple relax'
      write(*,*)'md_mode=4: quenched MD (default)'
      stop 'QMD%imd error: other modes in structure_opt are under debug.'
   endif
-  if (QMD%imdc/=0.and.QMD%imdc/=1.and.QMD%imdc/=2.and.QMD%imdc/=3) then
-     write(*,*)'md_mode_cell should be 0 1 2 or 3'
-     write(*,*)'md_mode_cell=0: simple relax'
-     write(*,*)'md_mode_cell=1: no relax'
+  if (QMD%imdc/=0.and.QMD%imdc/=2.and.QMD%imdc/=3) then
+     write(*,*)'md_mode_cell should be 0 2 or 3'
+     write(*,*)'md_mode_cell=0: FIRE'
      write(*,*)'md_mode_cell=2: quenched MD (default)'
      write(*,*)'md_mode_cell=3: RFC5'
      stop 'QMD%imdc error: other modes in structure_opt are under development.'
   endif
 
-  if( QMD%imd == 1 .and. QMD%imdc == 1 ) then
-     QMD%loopc=1
-     QMD%loopa=1
-
-     call timer%start()
-     call tote_frc_strs
-     call timer%stop()
-     call timer%show("tote_frc_strs:")
-
-     do i=1,3
-        QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
-     enddo
-
-     call strs_max
-
-     call output_struc(901)
-     call output_tote(902)
-     call output_frc(903)
-     call output_strs(904)
-  else if( QMD%imdc == 3 ) then
+  if( QMD%imdc == 3 ) then
      do loopc=1,QMD%nloopc
         QMD%loopc=loopc
         do loopa=1,QMD%nloopa
