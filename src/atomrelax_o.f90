@@ -89,6 +89,8 @@
       integer ina
       real*8 dra(3)
 
+      if((QMD%loopc.eq.1).and.(QMD%loopa.eq.1)) return
+
       do ina=1,QMD%natom
         if(QMD%iposfix(ina).eq.1) then
         dra=QMD%tstep*matmul(QMD%uv,QMD%vrr(:,ina))
@@ -106,6 +108,8 @@
       implicit none
       integer i,ina
       real*8 dra(3),dd,rdmax,prd
+
+      if((QMD%loopc.eq.1).and.(QMD%loopa.eq.1)) return
 
       do ina=1,QMD%natom
         if(QMD%iposfix(ina).eq.1) then
