@@ -805,22 +805,22 @@ subroutine ZRL_fsz(i,z,fsz,dfszdz)
    zb=0.20039
 !   az=abs(z)
 ! eq.(17)
-   if (z<=zt-zb) then
+   if (z-floor(z)<=zt-zb) then
       fsz=0.0d0
       dfszdz=0.0d0
-   elseif (z<=zt+zb) then
-      x=(z-zt)/zb
+   elseif (z-floor(z)<=zt+zb) then
+      x=0.5d0*(z-floor(z)-zt)/zb
 !      rtmp=pi*(x-nint(x))
       rtmp=pi*x
       fsz=0.5d0*(1.0d0+sin(rtmp))
-      dfszdz=0.5d0*cos(rtmp)*pi/zb
+      dfszdz=0.5d0*cos(rtmp)*0.5d0*pi/zb
 !      fsz=0.5d0*(1.0d0+sin((z-zt)/zb))
 !      dfszdz=0.5d0*cos((z-zt)/zb)*pi/zb
    else
       fsz=1.0d0
       dfszdz=0.0d0
    endif   
-!   fsz=fsz+int(z)
+   fsz=fsz+floor(z)
 end subroutine ZRL_fsz
 
 subroutine ZRL_fsz2(i,z,fsz,dfszdz)
