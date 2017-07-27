@@ -13,7 +13,7 @@ subroutine input
 
   implicit none
 
-  integer :: ifin,ret,ilength,icolumn,iatompos,itime,mscale
+  integer :: ifin,ret,ilength,icolumn,iatompos,itime,mscale,isymmetry
   integer :: i,j,itmp
   real(8) :: uvin(3,3),vtmp(3),aw,volscale,rscale,rtmp
   character :: ctmp*2
@@ -30,9 +30,12 @@ subroutine input
   call get_command_argument(1,inputfilename)
   write(6,*)'input=',trim(inputfilename)
 
+  QMD%is_symmetrized=.false.
   call getkeyvalue(inputfilename,"crystal",ciffilename,default="",unit=ifin,status=ret)
   if( ciffilename /= "" ) then
      call CIF_load(ciffilename)
+     call getkeyvalue(inputfilename,"symmetry",isymmetry,default=0)
+     QMD%is_symmetrized=isymmetry==1
   else
      ! unit cell
      call getkeyvalue(inputfilename,"unit_vec",unit=ifin,status=ret)
@@ -128,6 +131,8 @@ subroutine input
      write(*,"(i4,3f23.16,2i4)")QMD%zatm(i),(QMD%ra(j,i),j=1,3), &
           QMD%katm(i),QMD%iposfix(i)
   enddo
+
+  if (QMD%is_symmetrized) write(*,*)'symmetry on'
 
 ! optimization
   call getkeyvalue(inputfilename,"md_mode",QMD%imd,default=4)

@@ -250,7 +250,7 @@ contains
     end do
 
     ! symmetrize diff of coord of atoms
-    if( CIF_canSymmetrize() ) then
+    if( CIF_canSymmetrize() .and. QMD%is_symmetrized ) then
        ! translate from absolute to relative coordinates
        do ia=1, QMD%natom
           coord_diff(:,ia) = matmul(coord_diff(:,ia),QMD%bv(:,:))

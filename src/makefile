@@ -17,7 +17,7 @@ all: opt2_o
 opt2_o: $(OBJS_o)
 	$(FC) -o $@  $^ $(LIBS)
 
-atomrelax_o.o: parms_o.o 
+atomrelax_o.o: parms_o.o cif.o
 
 force_field.o: parms_o.o algebra.o
 

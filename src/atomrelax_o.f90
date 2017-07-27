@@ -3,11 +3,13 @@
 !          =3: simple ralaxation
 !          =4: quenched MD                               
       use paramlist
+      use cif_module
       implicit none
 
       integer mlin,n,isp,il,ina
       real*8 rdmax,scosth,gnorm1m,gnorm0,gnorm,dtoter
       real*8, allocatable:: rrsave(:,:)
+      real*8, allocatable:: rrdiff(:,:)
 
       allocate (rrsave(3,QMD%natom))
       rrsave=QMD%rr
@@ -55,6 +57,16 @@
       enddo
 
       QMD%toter0=QMD%tote
+
+! symmetrize differences of the atomic coords.
+    if(CIF_canSymmetrize().and.QMD%is_symmetrized) then
+       allocate(rrdiff(3,QMD%natom))
+       rrdiff=QMD%rr-rrsave
+       call CIF_symmetrizeDirection(rrdiff)
+       QMD%rr=rrsave+rrdiff
+       QMD%ra=matmul(QMD%uv,QMD%rr)
+       deallocate (rrdiff)
+    end if
 
 ! for fixed atoms
       do ina=1,QMD%natom
