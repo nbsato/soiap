@@ -3,7 +3,7 @@
 
 include make.inc
 
-OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o rfc5.o cif.o opt2_o_addtime.o
+OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o rfc5.o cif.o opt2_o_addtime.o adp_base_module.o adp_kwu14_module.o periodic_lattice_module.o
 
 .f.o:
 	$(FC) -c -o $@ $(FFLAGS_fixed) $*.f
@@ -19,11 +19,15 @@ opt2_o: $(OBJS_o)
 
 atomrelax_o.o: parms_o.o cif.o
 
-force_field.o: parms_o.o algebra.o
+force_field.o: parms_o.o algebra.o adp_kwu14_module.o
 
 input.o: keyvalue.o parms_o.o cif.o
 
 structure_opt.o: parms_o.o 
+
+adp_base_module.o: periodic_lattice_module.o
+
+adp_kwu14_module.o: adp_base_module.o
 
 clean:
 	rm -f *.o *.mod 

@@ -1216,6 +1216,29 @@ real(8) function ZRL_ci2(z)
   ZRL_ci2=ZRL_ci2/hartree ! eV to Hartree
 end function ZRL_ci2
 
+subroutine ADP_KWU14
+  use adp_kwu14_module, only: adp_kwu14_parameter, adp_kwu14_type
+  implicit none
+
+  real(8) :: uv(3,3)
+  type(adp_kwu14_type) :: pot
+
+  uv=QMD%uv*bohr ! Bohr to Ang
+
+  pot%parameter = adp_kwu14_parameter
+  call pot%set_system(uv,QMD%zatm,QMD%rr)
+
+  QMD%tote=pot%energy() ! in eV
+  QMD%tote=QMD%tote/hartree ! eV to Hartree
+
+  QMD%frc=pot%force() ! in eV/Ang
+  QMD%frc=QMD%frc/hartree*bohr ! eV/Ang to Hartree/Bohr
+
+  QMD%strs=pot%stress() ! in eV/Ang^3
+  QMD%strs=QMD%strs/hartree*bohr**3 ! eV/Ang^3 to Hartree/Bohr^3
+
+end subroutine ADP_KWU14
+
 function periodic_replica(i,i0,rcut) result(shift_replica)
   implicit none
   integer, intent(in) :: i ! target atom

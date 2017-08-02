@@ -152,6 +152,8 @@ contains
        call Tsuneyuki
     elseif (QMD%ifrcf==3) then ! ZRL potential for Si-O
        call ZRL
+    elseif (QMD%ifrcf==4) then ! ADP for Nd-Fe-B
+       call ADP_KWU14
     else   
        stop 'etot_frc_strs error'
     endif
