@@ -167,9 +167,6 @@ subroutine input
   call getkeyvalue(inputfilename,"th_stress",QMD%sth,default=5.d-7)
   write(*,*)'th_stress =',QMD%sth
 
-  call getkeyvalue(inputfilename,"cut_force",QMD%fcut,default=5.d-1)
-  write(*,*)'cut_force =',QMD%fcut
-
   if (QMD%imdc==3) then ! RFC5
      call getkeyvalue(inputfilename,"max_displacement",QMD%rdmax,default=0.10d0)
   else
