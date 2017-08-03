@@ -106,8 +106,9 @@ program main
               exit
            endif
 
-           call updt_velocity_atom
-           call updt_coord
+           if (loopa/=QMD%nloopa) then
+              call updt_coord
+           endif
         enddo ! QMD%loopa
 
         call strs_max
@@ -121,7 +122,6 @@ program main
            if (QMD%fmax<QMD%fth) exit
         endif
 
-        call updt_velocity_cell
         call updt_cell
      enddo ! QMD%loopc
   end if ! imdc /= 3
@@ -190,12 +190,18 @@ contains
 
   subroutine updt_cell
 
+    if (QMD%loopc>1) then
+       !    QMD%vuv=QMD%vuv+QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
+       QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell
+    else
+       !    QMD%vuv=QMD%vuv+QMD%tste*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
+       QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
+    endif
+
     QMD%uvo(:,:,2)=QMD%uvo(:,:,1)
     QMD%uvo(:,:,1)=QMD%uv
     QMD%strso(:,:,2)=QMD%strso(:,:,1)
     QMD%strso(:,:,1)=QMD%strs
-
-    !  QMD%vuv=QMD%vuv+0.5d0*QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
 
     if (QMD%imdc==0) then ! fire
        call lattice_fire(0.1d0)
@@ -217,25 +223,10 @@ contains
 
   end subroutine updt_cell
 
-  subroutine updt_velocity_cell
-    if (QMD%loopc>1) then
-       !    QMD%vuv=QMD%vuv+QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
-       QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell
-    else
-       !    QMD%vuv=QMD%vuv+QMD%tste*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
-       QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
-    endif
-  end subroutine updt_velocity_cell
-
   subroutine updt_coord
-
-    call atomrelax
-
-  end subroutine updt_coord
-
-  subroutine updt_velocity_atom
     integer :: ia
     real(8) :: rfac
+
     do ia=1,QMD%natom
        if (QMD%loopa>1) then
           rfac=QMD%tstep/(QMD%mass(ia)*QMD%mfac(ia))
@@ -244,7 +235,10 @@ contains
        endif
        QMD%vrr(:,ia)=QMD%vrr(:,ia)+rfac*matmul(QMD%frc(:,ia),QMD%bv(:,:))
     enddo
-  end subroutine updt_velocity_atom
+
+    call atomrelax
+
+  end subroutine updt_coord
 
   subroutine output_struc(ifo)
     integer :: ifo,i,j
