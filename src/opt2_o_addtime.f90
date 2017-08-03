@@ -229,7 +229,7 @@ contains
   end subroutine updt_cell
 
   subroutine updt_velocity_cell
-    if (QMD%nloopc>1) then
+    if (QMD%loopc>1) then
        !    QMD%vuv=QMD%vuv+QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
        QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell
     else
