@@ -14,7 +14,7 @@ type t_qmasmd
   real*8 :: tstep,tstep0,mcell,guv(3,3,0:2),sdv_cell(3,3),duv0(3,3),lambda_cell
   real*8 :: alphalm
   logical :: is_symmetrized
-  integer,allocatable :: iposfix(:),zatm(:),katm(:)
+  integer,allocatable :: iposfix(:),zatm(:)
   real*8,allocatable :: ra(:,:),rr(:,:),rro(:,:,:),mass(:),mfac(:)
   real*8,allocatable :: frc(:,:),frco(:,:,:),vrr(:,:)
 !  character,allocatable :: katom(:)*2

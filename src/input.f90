@@ -85,7 +85,7 @@ subroutine input
      QMD%vrr=0.d0
 
      call getkeyvalue(inputfilename,"number_element",QMD%nkatm,default=0)
-     allocate(QMD%zatm(QMD%natom),QMD%katm(QMD%natom),QMD%mass(QMD%natom),QMD%mfac(QMD%natom))
+     allocate(QMD%zatm(QMD%natom),QMD%mass(QMD%natom),QMD%mfac(QMD%natom))
      !  QMD%mconv=(1.6605655d-27/9.109534d-31)*0.5d0 ! Rydberg atomic units
      QMD%mconv=(1.6605655d-27/9.109534d-31) ! Hartree atomic units
 
@@ -93,7 +93,7 @@ subroutine input
 
      call getkeyvalue(inputfilename,"atom_list",unit=ifin,status=ret)
      do i=1,QMD%natom
-        read(ifin,*)QMD%zatm(i),vtmp(1:3),QMD%katm(i),QMD%iposfix(i)
+        read(ifin,*)QMD%zatm(i),vtmp(1:3),QMD%iposfix(i)
         if (iatompos==1) then
            QMD%rr(:,i)=vtmp
            QMD%ra(:,i)=matmul(QMD%uv,vtmp)
@@ -122,14 +122,14 @@ subroutine input
 
   write(*,*)'atom_list: lattice coordinate'
   do i=1,QMD%natom
-     write(*,"(i4,3f23.16,2i4)")QMD%zatm(i),(QMD%rr(j,i),j=1,3), &
-          QMD%katm(i),QMD%iposfix(i)
+     write(*,"(i4,3f23.16,i4)")QMD%zatm(i),(QMD%rr(j,i),j=1,3), &
+          QMD%iposfix(i)
   enddo
 
   write(*,*)'atom_list: Cartesian coordinate [Bohr]'
   do i=1,QMD%natom
-     write(*,"(i4,3f23.16,2i4)")QMD%zatm(i),(QMD%ra(j,i),j=1,3), &
-          QMD%katm(i),QMD%iposfix(i)
+     write(*,"(i4,3f23.16,i4)")QMD%zatm(i),(QMD%ra(j,i),j=1,3), &
+          QMD%iposfix(i)
   enddo
 
   if (QMD%is_symmetrized) write(*,*)'symmetry on'

@@ -862,7 +862,7 @@ contains
     QMD%frc(:,:) = 0.d0
     QMD%vrr(:,:) = 0.d0
 
-    allocate( QMD%zatm(QMD%natom), QMD%katm(QMD%natom) )
+    allocate( QMD%zatm(QMD%natom) )
     allocate( QMD%mass(QMD%natom), QMD%mfac(QMD%natom) )
 
     QMD%mconv = (1.6605655d-27/9.109534d-31) ! Hartree atomic units
@@ -870,7 +870,6 @@ contains
     symbol_found(:) = .false.
     do ia=1, size(cif%vatom_conv)
        QMD%zatm(ia) = getAtomicNumber(cif%vatom_conv(ia)%symbol)
-       QMD%katm(ia) = 1  !!??
        QMD%iposfix(ia) = 1 !!??
        QMD%rr(:,ia) = cif%vatom_conv(ia)%coords(:)
        QMD%ra(:,ia) = matmul(QMD%uv(:,:),QMD%rr(:,ia))
