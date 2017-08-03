@@ -5,9 +5,8 @@ program main
   use rfc5
   implicit none
 
-  integer i,j,ia,ika
+  integer i
   integer:: loopa,loopc
-  real*8:: rfac
   type(t_showtime)::  timer
 
   open(901,file='log.struc',form='formatted')
@@ -162,12 +161,7 @@ contains
        faemp=dsqrt(sum(QMD%frc(:,i)**2))
        if (QMD%iposfix(i)/=0.and.faemp>QMD%fmax) then
           QMD%fmax=faemp
-          QMD%iamax=i
        endif
-       !
-       !     if (QMD%iposfix(i)/=0.and.faemp>QMD%fcut) then
-       !        QMD%frc(:,i)=QMD%frc(:,i)*QMD%fcut/faemp
-       !     endif   
     enddo
 
     !  write(*,'(a,10F20.10)')'tote,fmax,tote/natom,omega,omega/natom=',&
@@ -195,8 +189,6 @@ contains
   end subroutine strs_max
 
   subroutine updt_cell
-
-    integer :: ifin,ret,ilength,icolumn,iatompos
 
     QMD%uvo(:,:,2)=QMD%uvo(:,:,1)
     QMD%uvo(:,:,1)=QMD%uv
@@ -237,10 +229,6 @@ contains
 
   subroutine updt_coord
 
-    integer :: ia
-    real*8 :: rfac,p1,p2,vrrmax,vrrabs
-    real*8,allocatable :: ratmp(:,:,:)
-
     call atomrelax
 
   end subroutine updt_coord
@@ -274,7 +262,7 @@ contains
   end subroutine output_struc
 
   subroutine output_tote(ifo)
-    integer :: ifo,i,j
+    integer :: ifo
 
     write(ifo,'(2i5,5F20.10)')QMD%loopc,QMD%loopa,QMD%tote,QMD%fmax,&
          QMD%tote/QMD%natom,QMD%omega*((bohr)**3),QMD%omega*(bohr**3)/QMD%natom 

@@ -857,8 +857,8 @@ contains
     QMD%natom = size(cif%vatom_conv)
 
     allocate( QMD%ra(3,QMD%natom), QMD%rr(3,QMD%natom) )
-    allocate( QMD%rro(3,QMD%natom,2), QMD%iposfix(QMD%natom) )
-    allocate( QMD%frc(3,QMD%natom), QMD%frco(3,QMD%natom,2), QMD%vrr(3,QMD%natom) )
+    allocate( QMD%iposfix(QMD%natom) )
+    allocate( QMD%frc(3,QMD%natom), QMD%vrr(3,QMD%natom) )
     QMD%frc(:,:) = 0.d0
     QMD%vrr(:,:) = 0.d0
 

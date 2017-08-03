@@ -73,11 +73,6 @@ subroutine lattice_fire(rdmax)
         vnorm=vnorm+sum(QMD%vuv(:,i)**2)
         fnorm=fnorm+sum(f(:,i)**2)
       enddo  
-      if (p.gt.0.0d0) then 
-         QMD%npstvc=QMD%npstvc+1
-      else
-         QMD%npstvc=0
-      endif   
       vnorm=sqrt(vnorm)
       fnorm=sqrt(fnorm)
 ! F2

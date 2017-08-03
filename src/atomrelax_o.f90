@@ -19,28 +19,10 @@
 !      rdmax=0.25d0 ! read from inputfile. see subroutine input for default
 
 ! setup
-      if ((QMD%loopa==1).and.(QMD%loopc==1)) then
-        allocate (QMD%rah(3,QMD%natom,mlin),QMD%gradh(3,QMD%natom,mlin))
-      end if
       if (QMD%loopa==1) QMD%npstv=0
-
-! QMD%imod: current step,  QMD%imod0: previous step,  QMD%imod2: next step
-      QMD%imod=mod((QMD%loopa-1),mlin)+1
-      if (QMD%loopa>1) then
-        QMD%imod0=mod((QMD%loopa-2),mlin)+1
-      else
-        QMD%imod0=mlin
-      end if
-      QMD%imod2=mod(QMD%loopa,mlin)+1
 
 ! relative to absolute
       QMD%ra=matmul(QMD%uv,QMD%rr)
-
-! Save Positions and Graidents at the previous relaxation step
-      do ina=1,QMD%natom
-        QMD%rah(:,ina,QMD%imod)=QMD%ra(:,ina)
-        QMD%gradh(:,ina,QMD%imod)=-QMD%frc(:,ina)
-      end do
 
 ! atomic relaxation
       if(iabs(QMD%imd).eq.3) then
@@ -55,8 +37,6 @@
       do ina=1,QMD%natom
          QMD%rr(:,ina)=matmul(QMD%ra(:,ina),QMD%bv)
       enddo
-
-      QMD%toter0=QMD%tote
 
 ! symmetrize differences of the atomic coords.
     if(CIF_canSymmetrize().and.QMD%is_symmetrized) then
@@ -127,7 +107,6 @@
         if(QMD%iposfix(ina).eq.1) then
           prd=sum(matmul(QMD%uv,QMD%vrr(:,ina))*QMD%frc(:,ina))
           if (prd.lt.(-tol)) then
-             QMD%rah(:,ina,QMD%imod2)=QMD%rah(:,ina,QMD%imod)
              QMD%vrr(:,ina)=0.0d0
           end if
 
