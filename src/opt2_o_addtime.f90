@@ -50,7 +50,6 @@ program main
               QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
            enddo
 
-           call output_struc(901)
            call output_tote(902)
 
            if (QMD%fmax<QMD%fth) then
@@ -66,6 +65,7 @@ program main
 
         call strs_max
 
+        call output_struc(901)
         call output_frc(903)
         call output_strs(904)
 
@@ -78,27 +78,27 @@ program main
         call updt_coordcell_RFC5((QMD%loopc-1)*QMD%nloopa+QMD%loopa,.true.,.true.)
      enddo
   else
+     call tote_frc_strs
      QMD%uvo(:,:,1)=QMD%uv
      QMD%strso(:,:,1)=QMD%strs
      QMD%vuv=0.d0
      do loopc=1,QMD%nloopc ! relax unit cell
         QMD%loopc=loopc
-        !     if (QMD%loopc>1) call updt_cell
-        call updt_cell
-        call output_struc(901)
 
-        QMD%frco(:,:,1)=QMD%frc
         do loopa=1,QMD%nloopa ! relax internal coordinates
            QMD%loopa=loopa
            write(6,*)'QMD%loopc,QMD%loopa=',QMD%loopc,QMD%loopa,' out of ', &
                 QMD%nloopc,QMD%nloopa
 
-           !        if (QMD%loopa>1) call updt_coord
-           call updt_coord
            call timer%start()
            call tote_frc_strs
            call timer%stop()
            call timer%show("tote_frc_strs:")
+
+           do i=1,3
+              QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
+           enddo
+
            ! debug: >
            call output_tote(902)
            if (QMD%fmax<QMD%fth) then 
@@ -108,14 +108,12 @@ program main
            endif
 
            call updt_velocity_atom
+           call updt_coord
         enddo ! QMD%loopa
-
-        do i=1,3
-           QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
-        enddo
 
         call strs_max
 
+        call output_struc(901)
         call output_frc(903)
         call output_strs(904)
         if (QMD%smax<QMD%sth) then
@@ -125,6 +123,7 @@ program main
         endif
 
         call updt_velocity_cell
+        call updt_cell
      enddo ! QMD%loopc
   end if ! imdc /= 3
 
@@ -204,8 +203,6 @@ contains
     QMD%strso(:,:,2)=QMD%strso(:,:,1)
     QMD%strso(:,:,1)=QMD%strs
 
-    if ((QMD%loopc==1).and.(QMD%imdc.ne.0)) return
-
     !  QMD%vuv=QMD%vuv+0.5d0*QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
 
     if (QMD%imdc==0) then ! fire
@@ -243,13 +240,6 @@ contains
     integer :: ia
     real*8 :: rfac,p1,p2,vrrmax,vrrabs
     real*8,allocatable :: ratmp(:,:,:)
-
-    if (QMD%loopa>1) then
-       QMD%rro(:,:,2)=QMD%rro(:,:,1)
-       QMD%frco(:,:,2)=QMD%frco(:,:,1)
-    endif
-    QMD%rro(:,:,1)=QMD%rr
-    QMD%frco(:,:,1)=QMD%frc
 
     call atomrelax
 

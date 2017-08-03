@@ -60,7 +60,6 @@ subroutine lattice_fire(rdmax)
         QMD%fire_falpc=0.99d0
         QMD%fire_dtmaxc=QMD%tstep0*10.0d0
         QMD%fire_alpc=QMD%fire_alp0c
-        return
       endif
 ! F1
 ! p=F.v
