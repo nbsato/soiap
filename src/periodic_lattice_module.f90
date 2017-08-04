@@ -22,6 +22,14 @@ module periodic_lattice_module
 
   end type periodic_lattice_type
 
+  type, public :: cell_list_type
+
+    private
+
+    integer, allocatable, public :: list(:, :)
+
+  end type cell_list_type
+
 contains
 
   pure real(kr) function volume(this)
@@ -49,7 +57,7 @@ contains
 
   end function reciprocal_lattice
 
-  function get_cell_of_replica(this, r_frac, origin_frac, cutoff) result(cell_replica)
+  type(cell_list_type) function get_cell_of_replica(this, r_frac, origin_frac, cutoff) result(cell_of_replica)
 
     use, intrinsic :: iso_fortran_env, only: error_unit
 
@@ -59,7 +67,6 @@ contains
     real(kr), intent(in) :: r_frac(3) ! target point in fractional coords.
     real(kr), intent(in) :: origin_frac(3) ! origin of a searched region in fractional coords.
     real(kr), intent(in) :: cutoff ! cutoff of a searched region
-    integer, allocatable :: cell_replica(:, :)
 
     real(kr) :: b(3, 3)
     real(kr) :: cutoff_cell(3)
@@ -93,7 +100,7 @@ contains
     r_frac_reduced = modulo(r_frac, 1._kr)
     origin = matmul(this%direct_lattice, origin_frac)
 
-    allocate(cell_replica(3, product(cell_max - cell_min + 1)))
+    allocate(cell_of_replica%list(3, product(cell_max - cell_min + 1)))
     num_replica = 0
 
     do n3 = cell_min(3), cell_max(3)
@@ -110,14 +117,14 @@ contains
             cycle
           end if
 
-          cell_replica(:, num_replica + 1) = cell
+          cell_of_replica%list(:, num_replica + 1) = cell
           num_replica = num_replica + 1
 
         end do
       end do
     end do
 
-    cell_replica = cell_replica(:, 1:num_replica)
+    cell_of_replica%list = cell_of_replica%list(:, 1:num_replica)
 
   end function get_cell_of_replica
 

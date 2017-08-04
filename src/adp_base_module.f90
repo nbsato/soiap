@@ -2,21 +2,15 @@
 ! Y. Mishin, M. J. Mehl, and D. A. Papaconstantopoulos, Acta Mater. 53, 4029 (2005).
 module adp_base_module
 
-  use, non_intrinsic :: periodic_lattice_module, only: periodic_lattice_type
+  use, non_intrinsic :: periodic_lattice_module, only: &
+      & cell_list_type, &
+      & periodic_lattice_type
 
   implicit none
 
   private
 
   integer, parameter, public :: kr = kind(0d0)
-
-  type :: cell_list_type
-
-    private
-
-    integer, allocatable, public :: list(:, :)
-
-  end type cell_list_type
 
   type, abstract, public :: adp_base_type
 
@@ -156,7 +150,7 @@ contains
     !$omp parallel do private(j)
     do i = 1, num_atom
       do j = 1, num_atom
-        this%cell_of_replica(j, i)%list = this%lattice%get_cell_of_replica( &
+        this%cell_of_replica(j, i) = this%lattice%get_cell_of_replica( &
             & real(r_frac(:, j), krpl), &
             & real(r_frac(:, i), krpl), &
             & real(this%cutoff(), krpl))

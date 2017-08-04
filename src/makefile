@@ -19,7 +19,7 @@ opt2_o: $(OBJS_o)
 
 atomrelax_o.o: parms_o.o cif.o
 
-force_field.o: parms_o.o algebra.o adp_kwu14_module.o
+force_field.o: parms_o.o algebra.o adp_kwu14_module.o periodic_lattice_module.o
 
 input.o: keyvalue.o parms_o.o cif.o
 
