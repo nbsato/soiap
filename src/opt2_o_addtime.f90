@@ -189,6 +189,7 @@ contains
   end subroutine strs_max
 
   subroutine updt_cell
+    integer :: ia
 
     if (QMD%loopc>1) then
        !    QMD%vuv=QMD%vuv+QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
@@ -220,6 +221,10 @@ contains
     write(*,*)'QMD%omega =',QMD%omega
     QMD%omegai=1.d0/QMD%omega
     QMD%bv=QMD%bv*QMD%omegai
+
+    do ia=1,QMD%natom
+       QMD%ra(:,ia)=matmul(QMD%uv(:,:),QMD%rr(:,ia))
+    enddo
 
   end subroutine updt_cell
 
