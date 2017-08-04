@@ -32,99 +32,54 @@ program main
      stop 'QMD%imdc error: other modes in structure_opt are under development.'
   endif
 
-  if( QMD%imdc == 3 ) then
-     do loopc=1,QMD%nloopc
-        QMD%loopc=loopc
-        do loopa=1,QMD%nloopa
-           QMD%loopa=loopa
-           write(6,*)'QMD%loopc,QMD%loopa=',QMD%loopc,QMD%loopa,' out of ', &
-                QMD%nloopc,QMD%nloopa
+  call tote_frc_strs
+  QMD%uvo(:,:,1)=QMD%uv
+  QMD%strso(:,:,1)=QMD%strs
+  QMD%vuv=0.d0
+  do loopc=1,QMD%nloopc ! relax unit cell
+     QMD%loopc=loopc
 
-           call timer%start()
-           call tote_frc_strs
-           call timer%stop()
-           call timer%show("tote_frc_strs:")
+     do loopa=1,QMD%nloopa ! relax internal coordinates
+        QMD%loopa=loopa
+        write(6,*)'QMD%loopc,QMD%loopa=',QMD%loopc,QMD%loopa,' out of ', &
+             QMD%nloopc,QMD%nloopa
 
-           do i=1,3
-              QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
-           enddo
+        call timer%start()
+        call tote_frc_strs
+        call timer%stop()
+        call timer%show("tote_frc_strs:")
 
-           call output_tote(902)
-
-           if (QMD%fmax<QMD%fth) then
-              write(*,'("QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax",2i5,e12.4)') &
-                   QMD%loopc,QMD%loopa,QMD%fmax
-              exit
-           endif
-
-           if (loopa/=QMD%nloopa) then
-              call updt_coordcell_RFC5((QMD%loopc-1)*QMD%nloopa+QMD%loopa,.true.,.false.)
-           endif
+        do i=1,3
+           QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
         enddo
 
-        call strs_max
+        call output_tote(902)
 
-        call output_struc(901)
-        call output_frc(903)
-        call output_strs(904)
-
-        if (QMD%smax<QMD%sth) then
-           write(*,'("QMD%strs converged. QMD%loopc, QMD%smax",i5,e12.4)') &
-                 QMD%loopc,QMD%smax
-           if (QMD%fmax<QMD%fth) exit
+        if (QMD%fmax<QMD%fth) then 
+           write(*,'("QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax",2i5,e12.4)') &
+                QMD%loopc,QMD%loopa,QMD%fmax
+           exit
         endif
 
-        call updt_coordcell_RFC5((QMD%loopc-1)*QMD%nloopa+QMD%loopa,.true.,.true.)
-     enddo
-  else
-     call tote_frc_strs
-     QMD%uvo(:,:,1)=QMD%uv
-     QMD%strso(:,:,1)=QMD%strs
-     QMD%vuv=0.d0
-     do loopc=1,QMD%nloopc ! relax unit cell
-        QMD%loopc=loopc
-
-        do loopa=1,QMD%nloopa ! relax internal coordinates
-           QMD%loopa=loopa
-           write(6,*)'QMD%loopc,QMD%loopa=',QMD%loopc,QMD%loopa,' out of ', &
-                QMD%nloopc,QMD%nloopa
-
-           call timer%start()
-           call tote_frc_strs
-           call timer%stop()
-           call timer%show("tote_frc_strs:")
-
-           do i=1,3
-              QMD%strs(i,i)=QMD%strs(i,i)-QMD%extstrs(i)
-           enddo
-
-           ! debug: >
-           call output_tote(902)
-           if (QMD%fmax<QMD%fth) then 
-              write(*,'("QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax",2i5,e12.4)') &
-                   QMD%loopc,QMD%loopa,QMD%fmax
-              exit
-           endif
-
-           if (loopa/=QMD%nloopa) then
-              call updt_coord
-           endif
-        enddo ! QMD%loopa
-
-        call strs_max
-
-        call output_struc(901)
-        call output_frc(903)
-        call output_strs(904)
-        if (QMD%smax<QMD%sth) then
-           write(*,'("QMD%strs converged. QMD%loopc, QMD%smax",i5,e12.4)')&
-                QMD%loopc,QMD%smax
-           if (QMD%fmax<QMD%fth) exit
+        if (loopa/=QMD%nloopa) then
+           call updt_coord
         endif
+     enddo ! QMD%loopa
 
-        call updt_cell
-     enddo ! QMD%loopc
-  end if ! imdc /= 3
+     call strs_max
+
+     call output_struc(901)
+     call output_frc(903)
+     call output_strs(904)
+
+     if (QMD%smax<QMD%sth) then
+        write(*,'("QMD%strs converged. QMD%loopc, QMD%smax",i5,e12.4)')&
+             QMD%loopc,QMD%smax
+        if (QMD%fmax<QMD%fth) exit
+     endif
+
+     call updt_cell
+  enddo ! QMD%loopc
 
   close(901)
   close(902)
@@ -191,40 +146,45 @@ contains
   subroutine updt_cell
     integer :: ia
 
-    if (QMD%loopc>1) then
-       !    QMD%vuv=QMD%vuv+QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
-       QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell
+    if (QMD%imdc==3) then ! RFC5
+       call updt_coordcell_RFC5((QMD%loopc-1)*QMD%nloopa+QMD%loopa,.true.,.true.)
     else
-       !    QMD%vuv=QMD%vuv+QMD%tste*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
-       QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
+       if (QMD%loopc>1) then
+          !    QMD%vuv=QMD%vuv+QMD%tstep*matmul(QMD%strs,QMD%uv)/QMD%mcell
+          QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell
+       else
+          !    QMD%vuv=QMD%vuv+QMD%tste*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
+          QMD%vuv=QMD%vuv+QMD%tstepc*matmul(QMD%strs,QMD%uv)/QMD%mcell*0.5d0
+       endif
+
+       QMD%uvo(:,:,2)=QMD%uvo(:,:,1)
+       QMD%uvo(:,:,1)=QMD%uv
+       QMD%strso(:,:,2)=QMD%strso(:,:,1)
+       QMD%strso(:,:,1)=QMD%strs
+
+       if (QMD%imdc==0) then ! fire
+          call lattice_fire(0.1d0)
+       elseif (QMD%imdc==1) then ! steepest descent
+          call latticerelax_sd
+       elseif (QMD%imdc==2) then ! quenched MD
+          call latticerelax
+       else   
+          call lattice_simple_relax
+       endif
+
+       call cross_x(QMD%uv(:,1),QMD%uv(:,2),QMD%bv(:,3))
+       call cross_x(QMD%uv(:,2),QMD%uv(:,3),QMD%bv(:,1))
+       call cross_x(QMD%uv(:,3),QMD%uv(:,1),QMD%bv(:,2))
+       QMD%omega=dot_product(QMD%bv(:,3),QMD%uv(:,3))
+       QMD%omegai=1.d0/QMD%omega
+       QMD%bv=QMD%bv*QMD%omegai
+
+       do ia=1,QMD%natom
+          QMD%ra(:,ia)=matmul(QMD%uv(:,:),QMD%rr(:,ia))
+       enddo
     endif
 
-    QMD%uvo(:,:,2)=QMD%uvo(:,:,1)
-    QMD%uvo(:,:,1)=QMD%uv
-    QMD%strso(:,:,2)=QMD%strso(:,:,1)
-    QMD%strso(:,:,1)=QMD%strs
-
-    if (QMD%imdc==0) then ! fire
-       call lattice_fire(0.1d0)
-    elseif (QMD%imdc==1) then ! steepest descent
-       call latticerelax_sd
-    elseif (QMD%imdc==2) then ! quenched MD
-       call latticerelax
-    else   
-       call lattice_simple_relax
-    endif
-
-    call cross_x(QMD%uv(:,1),QMD%uv(:,2),QMD%bv(:,3))
-    call cross_x(QMD%uv(:,2),QMD%uv(:,3),QMD%bv(:,1))
-    call cross_x(QMD%uv(:,3),QMD%uv(:,1),QMD%bv(:,2))
-    QMD%omega=dot_product(QMD%bv(:,3),QMD%uv(:,3))
     write(*,*)'QMD%omega =',QMD%omega
-    QMD%omegai=1.d0/QMD%omega
-    QMD%bv=QMD%bv*QMD%omegai
-
-    do ia=1,QMD%natom
-       QMD%ra(:,ia)=matmul(QMD%uv(:,:),QMD%rr(:,ia))
-    enddo
 
   end subroutine updt_cell
 
@@ -241,7 +201,11 @@ contains
        QMD%vrr(:,ia)=QMD%vrr(:,ia)+rfac*matmul(QMD%frc(:,ia),QMD%bv(:,:))
     enddo
 
-    call atomrelax
+    if (QMD%imdc==3) then ! RFC5
+       call updt_coordcell_RFC5((QMD%loopc-1)*QMD%nloopa+QMD%loopa,.true.,.false.)
+    else
+       call atomrelax
+    endif
 
   end subroutine updt_coord
 

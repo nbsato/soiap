@@ -6,17 +6,12 @@
       use cif_module
       implicit none
 
-      integer mlin,n,isp,il,ina
-      real*8 rdmax,scosth,gnorm1m,gnorm0,gnorm,dtoter
+      integer ina
       real*8, allocatable:: rrsave(:,:)
       real*8, allocatable:: rrdiff(:,:)
 
       allocate (rrsave(3,QMD%natom))
       rrsave=QMD%rr
-
-! parameters
-      mlin=QMD%nloopa
-!      rdmax=0.25d0 ! read from inputfile. see subroutine input for default
 
 ! setup
       if (QMD%loopa==1) QMD%npstv=0
@@ -81,8 +76,6 @@
       integer ina
       real*8 dra(3)
 
-      if((QMD%loopc.eq.1).and.(QMD%loopa.eq.1)) return
-
       do ina=1,QMD%natom
         if(QMD%iposfix(ina).eq.1) then
         dra=QMD%tstep*matmul(QMD%uv,QMD%vrr(:,ina))
@@ -98,10 +91,8 @@
       subroutine quench_md(rdmax)
       use paramlist
       implicit none
-      integer i,ina
+      integer ina
       real*8 dra(3),dd,rdmax,prd
-
-      if((QMD%loopc.eq.1).and.(QMD%loopa.eq.1)) return
 
       do ina=1,QMD%natom
         if(QMD%iposfix(ina).eq.1) then
@@ -141,11 +132,8 @@
 ! dt_max ~ 10 dt_MD
       use paramlist
       implicit none
-      integer i,ina
+      integer ina
       real*8 p,vnorm,fnorm,va(3,QMD%natom),dra(3),dd,rdmax
-! parameters
-      integer nmin
-      real*8 finc,fdec,alp0,falp,dtmax
 !
       if (QMD%loopc==1.and.QMD%loopa==1) then
         QMD%fire_nmin=5
@@ -155,7 +143,6 @@
         QMD%fire_falp=0.99d0
         QMD%fire_dtmax=QMD%tstep0*10.0d0
         QMD%fire_alp=QMD%fire_alp0
-        return
       endif
 ! F1
 ! p=F.v
