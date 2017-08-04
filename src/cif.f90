@@ -757,6 +757,10 @@ contains
     integer :: ia, n
     type(Atom_type) :: atom
 
+    if( .not. associated(cif%voperation) ) then
+       call push_back_Operation( cif%voperation, Operation_construct("x,y,z") )
+    end if
+
     !!  calc position of atoms in conventional cell
     do ia=1, size(cif%vatom_cif)
        do n=1, size(cif%voperation)
