@@ -78,7 +78,9 @@ program main
         if (QMD%fmax<QMD%fth) exit
      endif
 
-     call updt_cell
+     if (loopc/=QMD%nloopc) then
+        call updt_cell
+     endif
   enddo ! QMD%loopc
 
   close(901)
