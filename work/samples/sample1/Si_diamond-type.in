@@ -1,0 +1,41 @@
+unit_length 1 ! unit of lattice vectors and absolute atomic coords.
+              ! 1: Ang or 2: Bohr
+
+unit_vec_column 1 ! lattice vectors as 1: column or 2: raw vectors
+
+unit_vec ! lattice vectors
+( 2.5d0, 0    , 2.5d0 )
+( 2.5d0, 2.5d0, 0     )
+( 0    , 2.5d0, 2.5d0 )
+
+volume_scale 1.0 ! scale the volume while keeping the shape of the cell
+
+number_atom 2 ! number of atoms
+number_element 1 ! number of elements
+atom_pos 1 ! atomic positions in 1: relative or 2: absolute coords.
+
+atom_list ! list of atoms
+14  0    0    0     0 ! atomic number, x, y, z, fix
+14  0.25 0.25 0.25  1 ! atomic number, x, y, z, relax
+
+md_mode_cell 2 ! cell-relaxation method; 0: FIRE, 2: quenched MD, or 3: RFC5
+number_max_relax_cell 100 ! max. number of the cell relaxation
+mass_cell 17202.4d-2 ! cell "mass" in (electron mass)/Bohr
+
+md_mode 4 ! atom-relaxation method
+          ! 0: FIRE, 3: simple relax, or 4: quenched MD
+number_max_relax 100 ! max. number of the atom relaxation
+mass_scale 0 ! 0: do nothing or 1: rescale the atomic masses to that of C
+max_displacement 0.25 ! max. displacement of atoms in Bohr
+
+unit_time 1 ! unit of the time step; 1: fs or 2: Hartree a.u.
+time_step 1.0 ! time step
+
+external_stress_v 0.0 0.0 0.0 ! external pressure in GPa
+
+th_force 5d-5 ! convergence threshold for the force in Hartree a.u.
+th_stress 5d-7 ! convergence threshold for the stress in Hartree a.u.
+
+force_field 1 ! force field
+              ! 1: Stillinger-Weber for Si, 3: ZRL for Si-O-N-H, or 
+              ! 4: ADP for Nd-Fe-B
