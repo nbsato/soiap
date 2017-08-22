@@ -221,7 +221,7 @@ quenched MD method is slower but safer than the RFC5 method.
 
 ### How large is the value of `mass_cell`?
 
-Typically, the order of 1% of $M / \Omega_0$ is recommended, where $M$ is the 
+Typically, the order of 1% of $M / \Omega_0^{1/3}$ is recommended, where $M$ is the 
 total atomic mass per cell and $\Omega_0$ is the initial volume per cell. If 
 `mass_cell` is too small, the structure usually results in isolated atoms and 
 clusters. If `mass_cell` is too large, it takes long time to be converged.
