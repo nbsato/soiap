@@ -1,0 +1,403 @@
+ soiap version 0.1.0
+
+ input=./Si_diamond-type.in
+ unit vectors [Bohr]
+u1 =     6.6811829244004404     0.0000000000000000     0.0000000000000000
+u2 =     3.3405914622002211     5.7860741398615883     0.0000000000000000
+u3 =     3.3405914622002211     1.9286913799538628     5.4551630143256649
+ QMD%omega =   210.88470847407206     
+ number of atoms =           2
+ number of elements =           1
+ atom_list: lattice coordinate
+  14     0.0000000000000000     0.0000000000000000     0.0000000000000000   1
+  14     0.2500000000000000     0.2500000000000000     0.2500000000000000   1
+ atom_list: Cartesian coordinate [Bohr]
+  14     0.0000000000000000     0.0000000000000000     0.0000000000000000   1
+  14     3.3405914622002206     1.9286913799538628     1.3637907535814162   1
+ md_mode =           4
+ number_max_relax =         100
+ md_mode_cell =           2
+ number_max_relax_cell =         100
+external_stress_v    0.000000    0.000000    0.000000
+ time_step (input) =   1.0000000000000000     
+ time_step [a.u.] =   41.341374176780803     
+ th_force =   5.0000000000000002E-005
+ th_stress =   4.9999999999999998E-007
+ max_displacement [Bohr] =  0.25000000000000000     
+ mass_cell =   172.02400000000000     
+ force_field =           1
+ QMD%loopc,QMD%loopa=           1           1  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    1    1  0.2693E-16
+ QMD%omega =   214.50081001726812     
+ QMD%loopc,QMD%loopa=           2           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    2    1  0.2503E-15
+ QMD%omega =   225.12874201803544     
+ QMD%loopc,QMD%loopa=           3           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    3    1  0.1396E-15
+ QMD%omega =   241.83424535458613     
+ QMD%loopc,QMD%loopa=           4           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    4    1  0.1310E-15
+ QMD%omega =   262.76678700361651     
+ QMD%loopc,QMD%loopa=           5           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    5    1  0.1182E-15
+ QMD%omega =   285.70801698533705     
+ QMD%loopc,QMD%loopa=           6           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    6    1  0.6761E-16
+ QMD%omega =   272.84496488188205     
+ QMD%loopc,QMD%loopa=           7           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7           2  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7           3  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=           7           4  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7           5  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7           6  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7           7  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7           8  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7           9  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=           7          10  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7          11  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=           7          12  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7          13  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           7          14  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=           7          15  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    7   15  0.1736E-04
+ QMD%omega =   272.58066797982900     
+ QMD%loopc,QMD%loopa=           8           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    8    1  0.2809E-04
+ QMD%omega =   272.07906148463377     
+ QMD%loopc,QMD%loopa=           9           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           9           2  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           9           3  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           9           4  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           9           5  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=           9           6  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           9           7  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=           9           8  out of          100         100
+show_time: tote_frc_strs:     0.001 sec
+ QMD%loopc,QMD%loopa=           9           9  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=           9          10  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=           9          11  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=           9          12  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    9   12  0.4525E-04
+ QMD%omega =   271.39142012961162     
+ QMD%loopc,QMD%loopa=          10           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          10           2  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          10           3  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          10           4  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          10           5  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          10           6  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          10           7  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          10           8  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   10    8  0.4875E-04
+ QMD%omega =   270.58813914240818     
+ QMD%loopc,QMD%loopa=          11           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          11           2  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          11           3  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          11           4  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          11           5  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          11           6  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          11           7  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   11    7  0.4510E-04
+ QMD%omega =   269.95309692407869     
+ QMD%loopc,QMD%loopa=          12           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          12           2  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12           3  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12           4  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          12           5  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12           6  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12           7  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12           8  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          12           9  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12          10  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          12          11  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12          12  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          12          13  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12          14  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12          15  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          12          16  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12          17  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12          18  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          12          19  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12          20  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12          21  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          12          22  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          12          23  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   12   23  0.3706E-04
+ QMD%omega =   270.14317885362607     
+ QMD%loopc,QMD%loopa=          13           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13           2  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          13           3  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13           4  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13           5  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          13           6  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13           7  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13           8  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13           9  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13          10  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          13          11  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13          12  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13          13  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          13          14  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   13   14  0.3899E-04
+ QMD%omega =   270.09105178603556     
+ QMD%loopc,QMD%loopa=          14           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          14           2  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          14           3  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          14           4  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          14           5  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          14           6  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          14           7  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          14           8  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          14           9  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          14          10  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          14          11  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          14          12  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          14          13  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          14          14  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          14          15  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   14   15  0.4431E-04
+ QMD%omega =   270.07261943999134     
+ QMD%loopc,QMD%loopa=          15           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          15           2  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          15           3  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          15           4  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          15           5  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          15           6  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          15           7  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          15           8  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          15           9  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   15    9  0.4023E-04
+ QMD%omega =   270.07228640098202     
+ QMD%loopc,QMD%loopa=          16           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          16           2  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          16           3  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          16           4  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          16           5  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          16           6  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          16           7  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   16    7  0.4800E-04
+ QMD%omega =   270.17750614032525     
+ QMD%loopc,QMD%loopa=          17           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   17    1  0.2756E-04
+ QMD%omega =   270.24352155291712     
+ QMD%loopc,QMD%loopa=          18           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   18    1  0.4352E-04
+ QMD%omega =   270.34285194028121     
+ QMD%loopc,QMD%loopa=          19           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          19           2  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          19           3  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          19           4  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          19           5  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          19           6  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          19           7  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          19           8  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          19           9  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          19          10  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          19          11  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          19          12  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          19          13  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          19          14  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          19          15  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   19   15  0.4092E-04
+ QMD%omega =   270.27929792248176     
+ QMD%loopc,QMD%loopa=          20           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   20    1  0.3707E-04
+ QMD%omega =   270.27987988972899     
+ QMD%loopc,QMD%loopa=          21           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   21    1  0.4019E-04
+ QMD%omega =   270.26268476346843     
+ QMD%loopc,QMD%loopa=          22           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          22           2  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   22    2  0.4655E-04
+ QMD%omega =   270.24406832360950     
+ QMD%loopc,QMD%loopa=          23           1  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          23           2  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          23           3  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          23           4  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   23    4  0.4499E-04
+ QMD%omega =   270.22738317756495     
+ QMD%loopc,QMD%loopa=          24           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          24           2  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          24           3  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          24           4  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   24    4  0.4958E-04
+ QMD%omega =   270.21243523648735     
+ QMD%loopc,QMD%loopa=          25           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          25           2  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          25           3  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          25           4  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          25           5  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          25           6  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          25           7  out of          100         100
+show_time: tote_frc_strs:     0.003 sec
+ QMD%loopc,QMD%loopa=          25           8  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+ QMD%loopc,QMD%loopa=          25           9  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   25    9  0.4921E-04
+ QMD%omega =   270.23222570667548     
+ QMD%loopc,QMD%loopa=          26           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   26    1  0.3326E-04
+ QMD%omega =   270.23717666305805     
+ QMD%loopc,QMD%loopa=          27           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   27    1  0.3288E-04
+ QMD%omega =   270.24926751432133     
+ QMD%loopc,QMD%loopa=          28           1  out of          100         100
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   28    1  0.3639E-04
+QMD%strs converged. QMD%loopc, QMD%smax   28  0.2680E-06
+ *** QMD%loopc =          28
+tote,fmax,tote/natom,omega,omega/natom=       -0.3187201928        0.0000363875       -0.1593600964       40.0468183814       20.0234091907
+ !!!! normally end !!!!

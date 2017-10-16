@@ -1,0 +1,92 @@
+ soiap version 0.1.0
+
+ input=./Si_diamond-type.in
+ unit vectors [Bohr]
+u1 =     9.4486299428946161     0.0000000000000000     0.0000000000000000
+u2 =     0.0000000000000000     9.4486299428946161     0.0000000000000000
+u3 =     0.0000000000000000     0.0000000000000000     9.4486299428946161
+ QMD%omega =   843.54162963801866     
+ number of atoms =           8
+ number of elements =           1
+ atom_list: lattice coordinate
+  14     0.0000000000000000     0.0000000000000000     0.0000000000000000   1
+  14     0.0000000000000000     0.5000000000000000     0.5000000000000000   1
+  14     0.5000000000000000     0.5000000000000000     0.0000000000000000   1
+  14     0.5000000000000000     0.0000000000000000     0.5000000000000000   1
+  14     0.7500000000000000     0.2500000000000000     0.7500000000000000   1
+  14     0.2500000000000000     0.2500000000000000     0.2500000000000000   1
+  14     0.2500000000000000     0.7500000000000000     0.7500000000000000   1
+  14     0.7500000000000000     0.7500000000000000     0.2500000000000000   1
+ atom_list: Cartesian coordinate [Bohr]
+  14     0.0000000000000000     0.0000000000000000     0.0000000000000000   1
+  14     0.0000000000000000     4.7243149714473081     4.7243149714473081   1
+  14     4.7243149714473081     4.7243149714473081     0.0000000000000000   1
+  14     4.7243149714473081     0.0000000000000000     4.7243149714473081   1
+  14     7.0864724571709621     2.3621574857236540     7.0864724571709621   1
+  14     2.3621574857236540     2.3621574857236540     2.3621574857236540   1
+  14     2.3621574857236540     7.0864724571709621     7.0864724571709621   1
+  14     7.0864724571709621     7.0864724571709621     2.3621574857236540   1
+ symmetry on
+ md_mode =           4
+ number_max_relax =           1
+ md_mode_cell =           3
+ number_max_relax_cell =         100
+external_stress_v    0.000000    0.000000    0.000000
+ time_step (input) =   1.0000000000000000     
+ time_step [a.u.] =   41.341374176780803     
+ th_force =   5.0000000000000002E-005
+ th_stress =   4.9999999999999998E-007
+ max_displacement [Bohr] =  0.10000000000000001     
+ mass_cell =   5.0000000000000001E-004
+ force_field =           1
+ QMD%loopc,QMD%loopa=           1           1  out of          100           1
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    1    1  0.4914E-18
+ QMD%omega =   870.37046418535897     
+ QMD%loopc,QMD%loopa=           2           1  out of          100           1
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    2    1  0.4298E-15
+ QMD%omega =   898.00579910330930     
+ QMD%loopc,QMD%loopa=           3           1  out of          100           1
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    3    1  0.2646E-15
+ QMD%omega =   926.21999947344057     
+ QMD%loopc,QMD%loopa=           4           1  out of          100           1
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    4    1  0.2591E-15
+ QMD%omega =   955.01906529575263     
+ QMD%loopc,QMD%loopa=           5           1  out of          100           1
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    5    1  0.2794E-15
+ QMD%omega =   984.40899657024545     
+ QMD%loopc,QMD%loopa=           6           1  out of          100           1
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    6    1  0.1767E-15
+ QMD%omega =   1014.3957932969191     
+ QMD%loopc,QMD%loopa=           7           1  out of          100           1
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    7    1  0.3630E-15
+ QMD%omega =   1044.9854554757735     
+ QMD%loopc,QMD%loopa=           8           1  out of          100           1
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    8    1  0.3622E-15
+ QMD%omega =   1076.1839831068087     
+ QMD%loopc,QMD%loopa=           9           1  out of          100           1
+show_time: tote_frc_strs:     0.003 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    9    1  0.4166E-15
+ QMD%omega =   1059.5256783589307     
+ QMD%loopc,QMD%loopa=          10           1  out of          100           1
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   10    1  0.3254E-15
+ QMD%omega =   1080.7608094812936     
+ QMD%loopc,QMD%loopa=          11           1  out of          100           1
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   11    1  0.4694E-15
+ QMD%omega =   1080.9678906955228     
+ QMD%loopc,QMD%loopa=          12           1  out of          100           1
+show_time: tote_frc_strs:     0.002 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   12    1  0.7929E-15
+QMD%strs converged. QMD%loopc, QMD%smax   12  0.1522E-06
+ *** QMD%loopc =          12
+tote,fmax,tote/natom,omega,omega/natom=       -1.2748808143        0.0000000000       -0.1593601018      160.1829495895       20.0228686987
+ !!!! normally end !!!!

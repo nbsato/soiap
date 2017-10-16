@@ -1,7 +1,18 @@
-!!!!! subroutines for relaxing atomic positions 
-
-! for the time being, use atomrelax_qmas_o.f
-
+! ------------------------------------------------------------------------
+! Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+!
+! Licensed under the Apache License, Version 2.0 (the "License");
+! you may not use this file except in compliance with the License.
+! You may obtain a copy of the License at
+!
+!     http://www.apache.org/licenses/LICENSE-2.0
+!
+! Unless required by applicable law or agreed to in writing, software
+! distributed under the License is distributed on an "AS IS" BASIS,
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+! See the License for the specific language governing permissions and
+! limitations under the License.
+! ------------------------------------------------------------------------
 
 !!!!! subroutines for optimizing the unit cell
 subroutine latticerelax
@@ -47,7 +58,7 @@ subroutine lattice_fire(rdmax)
   use paramlist
   implicit none
   integer i
-  real*8 p,vnorm,fnorm,duv(3),dd,rdmax,f(3)
+  real*8 p,vnorm,fnorm,duv(3),dd,rdmax,f(3,3)
 ! parameters
       integer nmin
       real*8 finc,fdec,alp0,falp,dtmax
@@ -60,7 +71,6 @@ subroutine lattice_fire(rdmax)
         QMD%fire_falpc=0.99d0
         QMD%fire_dtmaxc=QMD%tstep0*10.0d0
         QMD%fire_alpc=QMD%fire_alp0c
-        return
       endif
 ! F1
 ! p=F.v
@@ -69,22 +79,17 @@ subroutine lattice_fire(rdmax)
       vnorm=0.0d0
       fnorm=0.0d0
       do i=1,3
-        f=matmul(QMD%strs,QMD%uv(:,i))
-        p=p+sum(QMD%vuv(:,i)*f)
+        f(:,i)=matmul(QMD%strs,QMD%uv(:,i))
+        p=p+sum(QMD%vuv(:,i)*f(:,i))
         vnorm=vnorm+sum(QMD%vuv(:,i)**2)
-        fnorm=fnorm+sum(f**2)
+        fnorm=fnorm+sum(f(:,i)**2)
       enddo  
-      if (p.gt.0.0d0) then 
-         QMD%npstvc=QMD%npstvc+1
-      else
-         QMD%npstvc=0
-      endif   
       vnorm=sqrt(vnorm)
       fnorm=sqrt(fnorm)
 ! F2
       do i=1,3
         QMD%vuv(:,i)=(1.0d0-QMD%fire_alpc)*QMD%vuv(:,i)+ &
-        QMD%fire_alpc*f(:)/fnorm*vnorm
+        QMD%fire_alpc*f(:,i)/fnorm*vnorm
       enddo  
 ! F3
       if ((p.gt.0.0d0).and.(QMD%npstv.gt.QMD%fire_nminc)) then
@@ -122,7 +127,6 @@ subroutine lattice_simple_relax
 end subroutine lattice_simple_relax
 
 subroutine latticerelax_sd
-! modified from latticerelax_cg in QMAS
   use paramlist
   integer i,j,k
   real*8 lambt1,lambt2,lambu1,lambu2,lambda,dtmp1,dtmp2,gamma

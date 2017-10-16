@@ -1,0 +1,16 @@
+data_diamond-type_Si
+
+_cell_length_a      3.53553
+_cell_length_b      3.53553
+_cell_length_c      3.53553
+_cell_angle_alpha  60
+_cell_angle_beta   60
+_cell_angle_gamma  60
+
+loop_
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+  Si  0    0    0
+  Si  0.25 0.25 0.25

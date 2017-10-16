@@ -1,3 +1,19 @@
+! ------------------------------------------------------------------------
+! Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+!
+! Licensed under the Apache License, Version 2.0 (the "License");
+! you may not use this file except in compliance with the License.
+! You may obtain a copy of the License at
+!
+!     http://www.apache.org/licenses/LICENSE-2.0
+!
+! Unless required by applicable law or agreed to in writing, software
+! distributed under the License is distributed on an "AS IS" BASIS,
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+! See the License for the specific language governing permissions and
+! limitations under the License.
+! ------------------------------------------------------------------------
+
 ! Last updated: 20120229
 C--------------------------------------------------------
 C  input routines
@@ -39,7 +55,6 @@ ckino, Feb. 29, 2012,   also accept
 c  int_1 325 
 c  or
 c  int_1 = 324 
-c  for QMAS
 c --- to here -------------------------------------------------------------
 c  The data in the <blockname> is a bit special because getkeyvalue just returns
 c  file hundle (and line numbers.) to read the contents. See example 5 below.

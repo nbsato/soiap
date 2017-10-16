@@ -1,44 +1,39 @@
+! ------------------------------------------------------------------------
+! Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+!
+! Licensed under the Apache License, Version 2.0 (the "License");
+! you may not use this file except in compliance with the License.
+! You may obtain a copy of the License at
+!
+!     http://www.apache.org/licenses/LICENSE-2.0
+!
+! Unless required by applicable law or agreed to in writing, software
+! distributed under the License is distributed on an "AS IS" BASIS,
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+! See the License for the specific language governing permissions and
+! limitations under the License.
+! ------------------------------------------------------------------------
+
       subroutine atomrelax
 ! QMD%imd  =0: FIRE
 !          =3: simple ralaxation
 !          =4: quenched MD                               
       use paramlist
+      use cif_module
       implicit none
 
-      integer mlin,n,isp,il,ina
-      real*8 rdmax,scosth,gnorm1m,gnorm0,gnorm,dtoter
+      integer ina
       real*8, allocatable:: rrsave(:,:)
+      real*8, allocatable:: rrdiff(:,:)
 
       allocate (rrsave(3,QMD%natom))
       rrsave=QMD%rr
 
-! parameters
-      mlin=QMD%nloopa
-!      rdmax=0.25d0 ! read from inputfile. see subroutine input for default
-
 ! setup
-      if ((QMD%loopa==1).and.(QMD%loopc==1)) then
-        allocate (QMD%rah(3,QMD%natom,mlin),QMD%gradh(3,QMD%natom,mlin))
-      end if
       if (QMD%loopa==1) QMD%npstv=0
-
-! QMD%imod: current step,  QMD%imod0: previous step,  QMD%imod2: next step
-      QMD%imod=mod((QMD%loopa-1),mlin)+1
-      if (QMD%loopa>1) then
-        QMD%imod0=mod((QMD%loopa-2),mlin)+1
-      else
-        QMD%imod0=mlin
-      end if
-      QMD%imod2=mod(QMD%loopa,mlin)+1
 
 ! relative to absolute
       QMD%ra=matmul(QMD%uv,QMD%rr)
-
-! Save Positions and Graidents at the previous relaxation step
-      do ina=1,QMD%natom
-        QMD%rah(:,ina,QMD%imod)=QMD%ra(:,ina)
-        QMD%gradh(:,ina,QMD%imod)=-QMD%frc(:,ina)
-      end do
 
 ! atomic relaxation
       if(iabs(QMD%imd).eq.3) then
@@ -54,7 +49,15 @@
          QMD%rr(:,ina)=matmul(QMD%ra(:,ina),QMD%bv)
       enddo
 
-      QMD%toter0=QMD%tote
+! symmetrize differences of the atomic coords.
+    if(CIF_canSymmetrize().and.QMD%is_symmetrized) then
+       allocate(rrdiff(3,QMD%natom))
+       rrdiff=QMD%rr-rrsave
+       call CIF_symmetrizeDirection(rrdiff)
+       QMD%rr=rrsave+rrdiff
+       QMD%ra=matmul(QMD%uv,QMD%rr)
+       deallocate (rrdiff)
+    end if
 
 ! for fixed atoms
       do ina=1,QMD%natom
@@ -104,14 +107,13 @@
       subroutine quench_md(rdmax)
       use paramlist
       implicit none
-      integer i,ina
+      integer ina
       real*8 dra(3),dd,rdmax,prd
 
       do ina=1,QMD%natom
         if(QMD%iposfix(ina).eq.1) then
           prd=sum(matmul(QMD%uv,QMD%vrr(:,ina))*QMD%frc(:,ina))
           if (prd.lt.(-tol)) then
-             QMD%rah(:,ina,QMD%imod2)=QMD%rah(:,ina,QMD%imod)
              QMD%vrr(:,ina)=0.0d0
           end if
 
@@ -146,11 +148,8 @@
 ! dt_max ~ 10 dt_MD
       use paramlist
       implicit none
-      integer i,ina
+      integer ina
       real*8 p,vnorm,fnorm,va(3,QMD%natom),dra(3),dd,rdmax
-! parameters
-      integer nmin
-      real*8 finc,fdec,alp0,falp,dtmax
 !
       if (QMD%loopc==1.and.QMD%loopa==1) then
         QMD%fire_nmin=5
@@ -160,7 +159,6 @@
         QMD%fire_falp=0.99d0
         QMD%fire_dtmax=QMD%tstep0*10.0d0
         QMD%fire_alp=QMD%fire_alp0
-        return
       endif
 ! F1
 ! p=F.v

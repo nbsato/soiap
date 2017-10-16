@@ -1,3 +1,19 @@
+! ------------------------------------------------------------------------
+! Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+!
+! Licensed under the Apache License, Version 2.0 (the "License");
+! you may not use this file except in compliance with the License.
+! You may obtain a copy of the License at
+!
+!     http://www.apache.org/licenses/LICENSE-2.0
+!
+! Unless required by applicable law or agreed to in writing, software
+! distributed under the License is distributed on an "AS IS" BASIS,
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+! See the License for the specific language governing permissions and
+! limitations under the License.
+! ------------------------------------------------------------------------
+
 module frcfield
   use paramlist
   implicit none
@@ -7,75 +23,114 @@ module frcfield
 !--------1---------2---------3---------4---------5---------6---------7--
 !--------1---------2---------3---------4---------5---------6---------7--
 subroutine Stillinger_Weber
+  use periodic_lattice_module, only: cell_list_type, kr, periodic_lattice_type
 
   integer :: i,j,k
+  integer :: jj,kk
   real*8 :: tote2,tote3,frc2(3,QMD%natom),frc3(3,QMD%natom),strs2(3,3),strs3(3,3)
   real*8 :: rri(3),rrj(3),rrk(3)
-  real*8 :: rrij(3),raij(3),dij,rrik(3),raik(3),dik,rrjk(3),rajk(3),djk
-  real*8 :: toteij,frcijr,toteijk,frcijk(3,3),vtmp(3)
+  real*8 :: rrij(3),raij(3),dij,rrik(3),raik(3),rrjk(3),rajk(3)
+  real*8 :: toteij,frcijr,toteijk,frcijk(3,3),vtmp(3),strsijk(3,3)
+  type(periodic_lattice_type) :: lattice
+  type(cell_list_type), allocatable :: cell_of_replica(:,:)
 ! debug:
+  real*8 :: a_cut
   real*8 :: sigma,eps,e1,e2,e3,vol,rho,faemp
+  parameter (a_cut=1.8d0)
   parameter (sigma=3.959164919d0) ! in Bohr
   parameter (eps=7.968005097d-2) ! in Hartree
 
+  lattice%direct_lattice=real(QMD%uv,kr)
+  allocate(cell_of_replica(QMD%natom,QMD%natom))
+
 ! two-body term
+!$omp parallel do private(j)
+  do i=1,QMD%natom
+     do j=1,QMD%natom
+        cell_of_replica(j,i)=lattice%get_cell_of_replica(real(QMD%rr(:,j),kr), real(QMD%rr(:,i),kr), real(a_cut*sigma,kr))
+     enddo
+  enddo
   tote2=0.d0
   frc2=0.d0
   strs2=0.d0
-!$omp parallel do private(rri,rrj,rrij,raij,dij,toteij,frcijr,vtmp), reduction(+:tote2,frc2,strs2) ,  schedule(dynamic,2)
-  do i=1,QMD%natom-1
-  do j=i+1,QMD%natom
+!$omp parallel do private(rri,rrj,rrij,raij,dij,toteij,frcijr,vtmp,j,jj,k), reduction(+:tote2,frc2,strs2) ,  schedule(dynamic,2)
+  do i=1,QMD%natom
      rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-!     call frac_diff_min(rri,rrj,rrij) ! rrij = rri - rrj
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij)
-     dij=sqrt(sum(raij**2))
-     if (QMD%zatm(i)==14.and.QMD%zatm(j)==14) &
-     call SW_Si_2body(dij,toteij,frcijr)
-     tote2=tote2+toteij
-     vtmp= frcijr*raij(:)/dij
-     frc2(:,i)= frc2(:,i)-vtmp
-     frc2(:,j)= frc2(:,j)+vtmp
-     do k=1,3
-     strs2(:,k)=strs2(:,k)+vtmp*raij(k)
-     enddo
-  enddo ! j
+     do j=i,QMD%natom
+        do jj=1,size(cell_of_replica(j,i)%list,dim=2)
+           if (j==i.and.all(cell_of_replica(j,i)%list(:,jj)==floor(rri(:)))) cycle
+           rrj=cell_of_replica(j,i)%list(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij)
+           dij=sqrt(sum(raij**2))
+           if (QMD%zatm(i)==14.and.QMD%zatm(j)==14) &
+           call SW_Si_2body(dij,toteij,frcijr)
+           if (i==j) then
+              toteij=toteij/2.0d0
+              frcijr=frcijr/2.0d0
+           endif
+           tote2=tote2+toteij
+           vtmp= frcijr*raij(:)/dij
+           frc2(:,i)= frc2(:,i)-vtmp
+           frc2(:,j)= frc2(:,j)+vtmp
+           do k=1,3
+              strs2(:,k)=strs2(:,k)+vtmp*raij(k)
+           enddo
+        enddo ! jj
+     enddo ! j
   enddo ! i
 
 ! three-body term
+!$omp parallel do private(j)
+  do i=1,QMD%natom
+     do j=1,QMD%natom
+        cell_of_replica(j,i)=lattice%get_cell_of_replica(real(QMD%rr(:,j),kr), real(QMD%rr(:,i),kr), real(2*a_cut*sigma,kr)) ! interaction range is twice the cutoff radius
+     enddo
+  enddo
   tote3=0.d0
   frc3=0.d0
   strs3=0.d0
-!$omp parallel do private(rri,rrj,rrij,raij,rrik,raik,rrk,rrjk,rajk,toteijk,frcijk) , reduction(+:tote3,frc3,strs3) , schedule(dynamic,2)
-  do i=1,QMD%natom-2
-  do j=i+1,QMD%natom-1
-  do k=j+1,QMD%natom
+!$omp parallel do private(rri,rrj,rrij,raij,rrik,raik,rrk,rrjk,rajk,toteijk,frcijk,strsijk,j,jj,k,kk) , reduction(+:tote3,frc3,strs3) , schedule(dynamic,2)
+  do i=1,QMD%natom
      rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-!     call frac_diff_min(rri,rrj,rrij) ! rrij = rri - rrj
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij)
-     rri=QMD%rr(:,i)
-     rrk=QMD%rr(:,k)
-!     call frac_diff_min(rri,rrk,rrik) ! rrik = rri - rrk
-     call frac_diff_min(rrk,rri,rrik) ! rrik = rrk - rri
-     raik=matmul(QMD%uv,rrik)
-     rrj=QMD%rr(:,j)
-     rrk=QMD%rr(:,k)
-!     call frac_diff_min(rrj,rrk,rrjk) ! rrjk = rrj - rrk
-     call frac_diff_min(rrk,rrj,rrjk) ! rrjk = rrk - rrj
-     rajk=matmul(QMD%uv,rrjk)
-     if (QMD%zatm(i)==14.and.QMD%zatm(j)==14.and.QMD%zatm(k)==14) &
-     call SW_Si_3body(raij,raik,rajk,toteijk,frcijk,strs3)
-!     call SW_Si_3body(-raij,-raik,-rajk,toteijk,frcijk,strs3)
-     tote3=tote3+toteijk
-     frc3(:,i)= frc3(:,i)+frcijk(:,1)
-     frc3(:,j)= frc3(:,j)+frcijk(:,2)
-     frc3(:,k)= frc3(:,k)+frcijk(:,3)
-  enddo ! k
-  enddo ! j
+     do j=i,QMD%natom
+        do jj=1,size(cell_of_replica(j,i)%list,dim=2)
+           if (j==i.and.all(cell_of_replica(j,i)%list(:,jj)==floor(rri(:)))) cycle
+           rrj=cell_of_replica(j,i)%list(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij)
+           do k=j,QMD%natom
+              do kk=1,size(cell_of_replica(k,i)%list,dim=2)
+                 if (k==i.and.all(cell_of_replica(k,i)%list(:,kk)==floor(rri(:)))) cycle
+                 if (k==j.and.kk==jj) cycle
+                 rrk=cell_of_replica(k,i)%list(:,kk)+modulo(QMD%rr(:,k),1.0d0)
+                 rrik=rrk(:)-rri(:)
+                 raik=matmul(QMD%uv,rrik)
+                 rrjk=rrk(:)-rrj(:)
+                 rajk=matmul(QMD%uv,rrjk)
+                 if (QMD%zatm(i)==14.and.QMD%zatm(j)==14.and.QMD%zatm(k)==14) &
+                 call SW_Si_3body(raij,raik,rajk,toteijk,frcijk,strsijk)
+                 if ((i==j.and.k/=i).or.(j==k.and.i/=j).or.(k==i.and.j/=k)) then
+                    toteijk=toteijk/2.0d0
+                    frcijk=frcijk/2.0d0
+                    strsijk=strsijk/2.0d0
+                 elseif (i==j.and.j==k) then
+                    toteijk=toteijk/6.0d0
+                    frcijk=frcijk/6.0d0
+                    strsijk=strsijk/6.0d0
+                 endif
+                 tote3=tote3+toteijk
+                 frc3(:,i)= frc3(:,i)+frcijk(:,1)
+                 frc3(:,j)= frc3(:,j)+frcijk(:,2)
+                 frc3(:,k)= frc3(:,k)+frcijk(:,3)
+                 strs3=strs3+strsijk
+              enddo ! kk
+           enddo ! k
+        enddo ! jj
+     enddo ! j
   enddo ! i
+
+  deallocate(cell_of_replica)
 
 ! total
   QMD%tote=tote2+tote3
@@ -142,6 +197,7 @@ subroutine SW_Si_3body(r12,r13,r23,tote3,frc3,strs3)
 
   tote3=0.d0
   frc3=0.d0
+  strs3=0.d0
    
   if (d12<a_cut.and.d13<a_cut) then
 !     v1=-s12
@@ -413,11 +469,16 @@ subroutine ZRL
 ! Billeter, Curioni, Fischer and Andreoni, PRB73, 155329 (2006); 
 ! PRB79, 169904(E) (2009).
 ! Augmented Tersoff potenntial for Si-O
+  use periodic_lattice_module, only: cell_list_type, kr, periodic_lattice_type
   integer :: ipair,i,j,k,l
+  integer :: jj
   real*8 :: tote,frc(3,QMD%natom),strs(3,3)
-  real*8 :: rri(3),rrj(3),rrk(3)
-  real*8 :: rrij(3),raij(3),dij,rrik(3),raik(3),dik,rrjk(3),rajk(3),djk
+  real*8 :: rri(3),rrj(3)
+  real*8 :: rrij(3),raij(3),dij
+  type(periodic_lattice_type) :: lattice
+  type(cell_list_type), allocatable :: cell_of_replica(:,:)
   real*8 :: dbdri(3,QMD%natom),dbdrj(3,QMD%natom),dbdrk(3,QMD%natom)
+  real*8 :: dbdrk_raik(3,3,QMD%natom)
   real*8 :: ddijdri(3),ddijdrj(3),dvijdri(3),dvijdrj(3)
 ! generalized Morse potential
   real*8 :: totem,frcm(3,QMD%natom),strsm(3,3)
@@ -430,46 +491,58 @@ subroutine ZRL
   real*8 :: totep,frcp(3,QMD%natom),strsp(3,3),eci
   real*8 :: zi,ziz0i,fsz,dfszdz,ci1,ci2,dzi,ddzidzi
 
+  lattice%direct_lattice=real(QMD%uv,kr)
+  allocate(cell_of_replica(QMD%natom,QMD%natom))
+
+!$omp parallel do private(j)
+  do i=1,QMD%natom
+     do j=1,QMD%natom
+        cell_of_replica(j,i)=lattice%get_cell_of_replica( &
+              real(QMD%rr(:,j),kr), &
+              real(QMD%rr(:,i),kr), &
+              real(ZRL_sij(QMD%zatm(i),QMD%zatm(j)),kr))
+     enddo
+  enddo
+
 ! generalized Morse potential, eq.(E-13) with eq.(1)
   totem=0.d0
   frcm=0.d0
   strsm=0.d0
   do i=1,QMD%natom
-  do j=1,QMD%natom
-     if (i==j) cycle
      rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij) ! relative to Cartesian
-     dij=sqrt(sum(raij**2)) ! bond length in Bohr
-     call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
-     if (ipair==0) cycle
-     call ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
-     call ZRL_VR(i,j,dij,fijij,dfijijddij,vr,dvrdd)
-     call ZRL_VA(i,j,dij,fijij,dfijijddij,bijij,va,dvadd,dvadb)
-     vij=vr+va
-     totem=totem+vij*0.5d0
-     call ddijdr(dij,raij,ddijdri,ddijdrj)
-     dvijdri=(dvrdd+dvadd)*ddijdri
-     dvijdrj=(dvrdd+dvadd)*ddijdrj
-     frcm(:,i)=frcm(:,i)-0.5d0*dvijdri
-     frcm(:,j)=frcm(:,j)-0.5d0*dvijdrj
-     do l=1,3
-        strsm(:,l)=strsm(:,l)-0.5d0*dvijdrj*raij(l)
-     enddo
-     do k=1,QMD%natom
-        frcm(:,i)=frcm(:,i)-0.5d0*dvadb*dbdri(:,k)
-        frcm(:,j)=frcm(:,j)-0.5d0*dvadb*dbdrj(:,k)
-        frcm(:,k)=frcm(:,k)-0.5d0*dvadb*dbdrk(:,k)
-        rrk=QMD%rr(:,k)
-        call frac_diff_min(rrk,rri,rrik) ! rrik = rrk - rri
-        raik=matmul(QMD%uv,rrik) ! relative to Cartesian
-        do l=1,3
-           strsm(:,l)=strsm(:,l)-0.5d0*dvadb*dbdrj(:,k)*raij(l) &
-                                -0.5d0*dvadb*dbdrk(:,k)*raik(l)
-        enddo ! l
-     enddo ! k 
-  enddo ! j
+     do j=1,QMD%natom
+        do jj=1,size(cell_of_replica(j,i)%list,dim=2)
+           if (j==i.and.all(cell_of_replica(j,i)%list(:,jj)==floor(rri(:)))) cycle
+           rrj=cell_of_replica(j,i)%list(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij) ! relative to Cartesian
+           dij=sqrt(sum(raij**2)) ! bond length in Bohr
+           call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
+           if (ipair==0) cycle
+           call ZRL_bijij(i,j,cell_of_replica(j,i)%list(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrk_raik)
+           call ZRL_VR(i,j,dij,fijij,dfijijddij,vr,dvrdd)
+           call ZRL_VA(i,j,dij,fijij,dfijijddij,bijij,va,dvadd,dvadb)
+           vij=vr+va
+           totem=totem+vij*0.5d0
+           call ddijdr(dij,raij,ddijdri,ddijdrj)
+           dvijdri=(dvrdd+dvadd)*ddijdri
+           dvijdrj=(dvrdd+dvadd)*ddijdrj
+           frcm(:,i)=frcm(:,i)-0.5d0*dvijdri
+           frcm(:,j)=frcm(:,j)-0.5d0*dvijdrj
+           do l=1,3
+              strsm(:,l)=strsm(:,l)-0.5d0*dvijdrj*raij(l)
+           enddo
+           do k=1,QMD%natom
+              frcm(:,i)=frcm(:,i)-0.5d0*dvadb*dbdri(:,k)
+              frcm(:,j)=frcm(:,j)-0.5d0*dvadb*dbdrj(:,k)
+              frcm(:,k)=frcm(:,k)-0.5d0*dvadb*dbdrk(:,k)
+              do l=1,3
+                 strsm(:,l)=strsm(:,l)-0.5d0*dvadb*dbdrj(:,k)*raij(l) &
+                       -0.5d0*dvadb*dbdrk_raik(:,l,k)
+              enddo ! l
+           enddo ! k 
+        enddo ! jj
+     enddo ! j
   enddo ! i
 
 ! core energies, the second term in eq.(E-13)
@@ -486,19 +559,21 @@ subroutine ZRL
   frcp=0.d0
   strsp=0.d0
   do i=1,QMD%natom
-     zi=0.0d0
-  do j=1,QMD%natom
-     if (i==j) cycle
      rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij) ! relative to Cartesian
-     dij=sqrt(sum(raij**2)) ! bond length in Bohr
-     call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
-     if (ipair==0) cycle
-     call ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
-     zi=zi+fijij*bijij
-  enddo ! j   
+     zi=0.0d0
+     do j=1,QMD%natom
+        do jj=1,size(cell_of_replica(j,i)%list,dim=2)
+           if (j==i.and.all(cell_of_replica(j,i)%list(:,jj)==floor(rri(:)))) cycle
+           rrj=cell_of_replica(j,i)%list(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij) ! relative to Cartesian
+           dij=sqrt(sum(raij**2)) ! bond length in Bohr
+           call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
+           if (ipair==0) cycle
+           call ZRL_bijij(i,j,cell_of_replica(j,i)%list(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrk_raik)
+           zi=zi+fijij*bijij
+        enddo ! jj
+     enddo ! j
      ziz0i=zi-ZRL_z0i(QMD%zatm(i))
 ! eq.(15)(17)
      call ZRL_fsz(i,abs(ziz0i),fsz,dfszdz)
@@ -510,42 +585,42 @@ subroutine ZRL
 ! eq.(14)
      eci=ci1*dzi+ci2*dzi**2
      totep=totep+eci
-  do j=1,QMD%natom
-     if (i==j) cycle
-     rri=QMD%rr(:,i)
-     rrj=QMD%rr(:,j)
-     call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-     raij=matmul(QMD%uv,rrij) ! relative to Cartesian
-     dij=sqrt(sum(raij**2)) ! bond length in Bohr
-     call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
-     if (ipair==0) cycle
-     call ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
+     do j=1,QMD%natom
+        do jj=1,size(cell_of_replica(j,i)%list,dim=2)
+           if (j==i.and.all(cell_of_replica(j,i)%list(:,jj)==floor(rri(:)))) cycle
+           rrj=cell_of_replica(j,i)%list(:,jj)+modulo(QMD%rr(:,j),1.0d0)
+           rrij=rrj(:)-rri(:)
+           raij=matmul(QMD%uv,rrij) ! relative to Cartesian
+           dij=sqrt(sum(raij**2)) ! bond length in Bohr
+           call ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
+           if (ipair==0) cycle
+           call ZRL_bijij(i,j,cell_of_replica(j,i)%list(:,jj),bijij,dbdri,dbdrj,dbdrk,dbdrk_raik)
 
-     call ddijdr(dij,raij,ddijdri,ddijdrj)
-     dzidri2=bijij*dfijijddij*ddijdri
-     dzidrj2=bijij*dfijijddij*ddijdrj
+           call ddijdr(dij,raij,ddijdri,ddijdrj)
+           dzidri2=bijij*dfijijddij*ddijdri
+           dzidrj2=bijij*dfijijddij*ddijdrj
 
-     decidzi=(ci1+2.0d0*ci2*dzi)*ddzidzi
-     decidb=decidzi*fijij
-     frcp(:,i)=frcp(:,i)-decidzi*dzidri2
-     frcp(:,j)=frcp(:,j)-decidzi*dzidrj2
-     do l=1,3
-        strsp(:,l)=strsp(:,l)-decidzi*dzidrj2*raij(l)
-     enddo
-     do k=1,QMD%natom
-        frcp(:,i)=frcp(:,i)-decidb*dbdri(:,k)
-        frcp(:,j)=frcp(:,j)-decidb*dbdrj(:,k)
-        frcp(:,k)=frcp(:,k)-decidb*dbdrk(:,k)
-        rrk=QMD%rr(:,k)
-        call frac_diff_min(rrk,rri,rrik) ! rrik = rrk - rri
-        raik=matmul(QMD%uv,rrik) ! relative to Cartesian
-        do l=1,3
-           strsp(:,l)=strsp(:,l)-decidb*dbdrj(:,k)*raij(l) &
-                                -decidb*dbdrk(:,k)*raik(l) 
-        enddo ! l   
-     enddo ! k 
-  enddo ! j   
+           decidzi=(ci1+2.0d0*ci2*dzi)*ddzidzi
+           decidb=decidzi*fijij
+           frcp(:,i)=frcp(:,i)-decidzi*dzidri2
+           frcp(:,j)=frcp(:,j)-decidzi*dzidrj2
+           do l=1,3
+              strsp(:,l)=strsp(:,l)-decidzi*dzidrj2*raij(l)
+           enddo
+           do k=1,QMD%natom
+              frcp(:,i)=frcp(:,i)-decidb*dbdri(:,k)
+              frcp(:,j)=frcp(:,j)-decidb*dbdrj(:,k)
+              frcp(:,k)=frcp(:,k)-decidb*dbdrk(:,k)
+              do l=1,3
+                 strsp(:,l)=strsp(:,l)-decidb*dbdrj(:,k)*raij(l) &
+                                      -decidb*dbdrk_raik(:,l,k)
+              enddo ! l
+           enddo ! k
+        enddo ! jj
+     enddo ! j
   enddo ! i   
+
+  deallocate(cell_of_replica)
 
   QMD%tote=totem+totec+totep
 !  QMD%tote=totem+totec
@@ -601,18 +676,25 @@ subroutine ZRL_fijij(i,j,dij,fijij,dfijijddij,ipair)
    endif   
 end subroutine ZRL_fijij
 
-subroutine ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
+subroutine ZRL_bijij(i,j,shiftj,bijij,dbdri,dbdrj,dbdrk,dbdrk_raik)
 ! eq.(6) in PRB73,155329(2006)
+   use periodic_lattice_module, only: cell_list_type, kr, periodic_lattice_type
    implicit none
    real(8) :: bijij,pi
    real(8) :: dbdri(3,QMD%natom),dbdrj(3,QMD%natom),dbdrk(3,QMD%natom)
+   real(8) :: dbdrk_raik(3,3,QMD%natom)
    real(8) :: rri(3),rrj(3),rrk(3),rrij(3),rrik(3),raij(3),raik(3)
+   integer :: shiftj(3)
+   type(periodic_lattice_type) :: lattice
+   type(cell_list_type) :: cell_of_replica
    real(8) :: dij,dik,cosjik,fikik,eijkijk,tijki,ztijij,chiij,betai,ni
    real(8) :: dfikikddik,deddij,deddik,dbijijdztij
    real(8) :: dcdri(3),dcdrj(3),dcdrk(3)
    real(8) :: ddijdri(3),ddijdrj(3),ddikdri(3),ddikdrk(3)
    real(8) :: dztijijddij,dztijijddik,dztijijdcos,dtijkidcos
+   real(8) :: tempk(3)
    integer :: ipair,i,j,k,zi,zj
+   integer :: kk,l
 
 !   pi=4.0d0*atan(1.0d0)
    zi=QMD%zatm(i)
@@ -625,46 +707,64 @@ subroutine ZRL_bijij(i,j,bijij,dbdri,dbdrj,dbdrk)
    dbdrj=0.0d0
    dbdrk=0.0d0
    ztijij=0.0d0
+   dbdrk_raik=0.0d0
+   rri=QMD%rr(:,i)
+   rrj=shiftj(:)+modulo(QMD%rr(:,j),1.0d0)
+   rrij=rrj(:)-rri(:)
+   raij=matmul(QMD%uv,rrij) ! relative to Cartesian
+   dij=sqrt(sum(raij**2)) ! bond length in Bohr
 
-      rri=QMD%rr(:,i)
-      rrj=QMD%rr(:,j)
-      call frac_diff_min(rrj,rri,rrij) ! rrij = rrj - rri
-      raij=matmul(QMD%uv,rrij) ! relative to Cartesian
-      dij=sqrt(sum(raij**2)) ! bond length in Bohr
+   lattice%direct_lattice=real(QMD%uv,kr)
 
    do k=1,QMD%natom
-      if (k==i.or.k==j) cycle
-!      rri=QMD%rr(:,i)
-      rrk=QMD%rr(:,k)
-      call frac_diff_min(rrk,rri,rrik) ! rrik = rrk - rri
-      raik=matmul(QMD%uv,rrik) ! relative to Cartesian
-      dik=sqrt(sum(raik**2)) ! bond length in Bohr
- 
-      cosjik=dot_product(raij,raik)/(dij*dik)
+      cell_of_replica=lattice%get_cell_of_replica(real(QMD%rr(:,k),kr),real(QMD%rr(:,i),kr),real(ZRL_sij(zi,QMD%zatm(k)),kr))
+      do kk=1,size(cell_of_replica%list,dim=2)
+         if (k==i.and.all(cell_of_replica%list(:,kk)==floor(rri(:)))) cycle
+         if (k==j.and.all(cell_of_replica%list(:,kk)==shiftj(:))) cycle
+         rrk=cell_of_replica%list(:,kk)+modulo(QMD%rr(:,k),1.0d0)
+         rrik=rrk(:)-rri(:)
+         raik=matmul(QMD%uv,rrik) ! relative to Cartesian
+         dik=sqrt(sum(raik**2)) ! bond length in Bohr
 
-      call ZRL_fijij(i,k,dik,fikik,dfikikddik,ipair) ! eq.(3)
-      if (ipair==0) cycle
-      call ZRL_eijkijk(i,j,k,dij,dik,eijkijk,deddij,deddik) ! eq.(11)
-      call ZRL_tijki(i,cosjik,tijki,dtijkidcos) ! eq.(8)
-      ztijij=ztijij+fikik*eijkijk*tijki ! eq.(7)
-      dztijijddij=fikik*deddij*tijki
-      dztijijddik=fikik*deddik*tijki+dfikikddik*eijkijk*tijki
-      dztijijdcos=fikik*eijkijk*dtijkidcos
+         cosjik=dot_product(raij,raik)/(dij*dik)
 
-      call ddijdr(dij,raij,ddijdri,ddijdrj)
-      call ddijdr(dik,raik,ddikdri,ddikdrk)
-      call dcosjikdr(raij,raik,dij,dik,cosjik,dcdri,dcdrj,dcdrk)
-      dbdri(:,k)=dztijijddij*ddijdri+dztijijddik*ddikdri+dztijijdcos*dcdri
-      dbdrj(:,k)=dztijijddij*ddijdrj                    +dztijijdcos*dcdrj
-      dbdrk(:,k)=                    dztijijddik*ddikdrk+dztijijdcos*dcdrk
+         call ZRL_fijij(i,k,dik,fikik,dfikikddik,ipair) ! eq.(3)
+         if (ipair==0) cycle
+         call ZRL_eijkijk(i,j,k,dij,dik,eijkijk,deddij,deddik) ! eq.(11)
+         call ZRL_tijki(i,cosjik,tijki,dtijkidcos) ! eq.(8)
+         ztijij=ztijij+fikik*eijkijk*tijki ! eq.(7)
+         dztijijddij=fikik*deddij*tijki
+         dztijijddik=fikik*deddik*tijki+dfikikddik*eijkijk*tijki
+         dztijijdcos=fikik*eijkijk*dtijkidcos
+
+         call ddijdr(dij,raij,ddijdri,ddijdrj)
+         call ddijdr(dik,raik,ddikdri,ddikdrk)
+         call dcosjikdr(raij,raik,dij,dik,cosjik,dcdri,dcdrj,dcdrk)
+         dbdri(:,k)=dbdri(:,k)+dztijijddij*ddijdri+dztijijddik*ddikdri+dztijijdcos*dcdri
+         dbdrj(:,k)=dbdrj(:,k)+dztijijddij*ddijdrj                    +dztijijdcos*dcdrj
+         tempk     =                              +dztijijddik*ddikdrk+dztijijdcos*dcdrk
+         dbdrk(:,k)=dbdrk(:,k)+tempk(:)
+
+         do l=1,3
+            dbdrk_raik(:,l,k)=dbdrk_raik(:,l,k)+tempk(:)*raik(l)
+         enddo ! l
+      enddo ! kk
    enddo ! k   
 
    bijij=chiij*(1.0d0+(betai*ztijij)**ni)**(-0.5d0/ni)
 !   bijij=chiij*(1.0d0+(betai*ztijij)**ni)**(-0.5d0*ni)
-   dbijijdztij=-0.5d0*ni*chiij*(1.0d0+(betai*ztijij)**ni)**(-0.5d0/ni-1.0d0)*ni*(betai*ztijij)**(ni-1.0d0)*betai
-   dbdri=dbijijdztij*dbdri
-   dbdrj=dbijijdztij*dbdrj
-   dbdrk=dbijijdztij*dbdrk
+   if (ztijij==0.0d0) then
+      dbdri=0.0d0
+      dbdrj=0.0d0
+      dbdrk=0.0d0
+      dbdrk_raik=0.0d0
+   else
+      dbijijdztij=-0.5d0/ni*chiij*(1.0d0+(betai*ztijij)**ni)**(-0.5d0/ni-1.0d0)*ni*(betai*ztijij)**(ni-1.0d0)*betai
+      dbdri=dbijijdztij*dbdri
+      dbdrj=dbijijdztij*dbdrj
+      dbdrk=dbijijdztij*dbdrk
+      dbdrk_raik=dbijijdztij*dbdrk_raik
+   endif
 
 end subroutine ZRL_bijij
 
@@ -748,22 +848,22 @@ subroutine ZRL_fsz(i,z,fsz,dfszdz)
    zb=0.20039
 !   az=abs(z)
 ! eq.(17)
-   if (z<=zt-zb) then
+   if (z-floor(z)<=zt-zb) then
       fsz=0.0d0
       dfszdz=0.0d0
-   elseif (z<=zt+zb) then
-      x=(z-zt)/zb
+   elseif (z-floor(z)<=zt+zb) then
+      x=0.5d0*(z-floor(z)-zt)/zb
 !      rtmp=pi*(x-nint(x))
       rtmp=pi*x
       fsz=0.5d0*(1.0d0+sin(rtmp))
-      dfszdz=0.5d0*cos(rtmp)*pi/zb
+      dfszdz=0.5d0*cos(rtmp)*0.5d0*pi/zb
 !      fsz=0.5d0*(1.0d0+sin((z-zt)/zb))
 !      dfszdz=0.5d0*cos((z-zt)/zb)*pi/zb
    else
       fsz=1.0d0
       dfszdz=0.0d0
    endif   
-!   fsz=fsz+int(z)
+   fsz=fsz+floor(z)
 end subroutine ZRL_fsz
 
 subroutine ZRL_fsz2(i,z,fsz,dfszdz)
@@ -984,6 +1084,12 @@ real(8) function ZRL_si(z)
   ZRL_si=ZRL_si/bohr ! Ang to Bohr
 end function ZRL_si
 
+real(8) function ZRL_sij(zi,zj)
+   implicit none
+   integer, intent(in) :: zi,zj
+   ZRL_sij=sqrt(ZRL_si(zi)*ZRL_si(zj))
+end function ZRL_sij
+
 real(8) function ZRL_betai(z)
   implicit none
   integer :: z
@@ -1152,5 +1258,28 @@ real(8) function ZRL_ci2(z)
   endif
   ZRL_ci2=ZRL_ci2/hartree ! eV to Hartree
 end function ZRL_ci2
+
+subroutine ADP_KWU14
+  use adp_kwu14_module, only: adp_kwu14_parameter, adp_kwu14_type
+  implicit none
+
+  real(8) :: uv(3,3)
+  type(adp_kwu14_type) :: pot
+
+  uv=QMD%uv*bohr ! Bohr to Ang
+
+  pot%parameter = adp_kwu14_parameter
+  call pot%set_system(uv,QMD%zatm,QMD%rr)
+
+  QMD%tote=pot%energy() ! in eV
+  QMD%tote=QMD%tote/hartree ! eV to Hartree
+
+  QMD%frc=pot%force() ! in eV/Ang
+  QMD%frc=QMD%frc/hartree*bohr ! eV/Ang to Hartree/Bohr
+
+  QMD%strs=pot%stress() ! in eV/Ang^3
+  QMD%strs=QMD%strs/hartree*bohr**3 ! eV/Ang^3 to Hartree/Bohr^3
+
+end subroutine ADP_KWU14
 
 end module

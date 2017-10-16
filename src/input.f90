@@ -1,3 +1,19 @@
+! ------------------------------------------------------------------------
+! Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+!
+! Licensed under the Apache License, Version 2.0 (the "License");
+! you may not use this file except in compliance with the License.
+! You may obtain a copy of the License at
+!
+!     http://www.apache.org/licenses/LICENSE-2.0
+!
+! Unless required by applicable law or agreed to in writing, software
+! distributed under the License is distributed on an "AS IS" BASIS,
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+! See the License for the specific language governing permissions and
+! limitations under the License.
+! ------------------------------------------------------------------------
+
 subroutine show_argument()
   implicit none
   write(6,*)
@@ -9,114 +25,130 @@ end subroutine show_argument
 subroutine input
   use keyvalue
   use paramlist
+  use cif_module
 
   implicit none
 
-  integer :: ifin,ret,ilength,icolumn,iatompos,itime,mscale
+  integer :: ifin,ret,ilength,icolumn,iatompos,itime,mscale,isymmetry
   integer :: i,j,itmp
   real(8) :: uvin(3,3),vtmp(3),aw,volscale,rscale,rtmp
   character :: ctmp*2
 
   character(120):: inputfilename
+  character(120):: ciffilename
   integer:: narg
- narg=command_argument_count()
+
+  narg=command_argument_count()
   if (narg/=1) then 
      call show_argument()
      stop 100
   endif
   call get_command_argument(1,inputfilename)
   write(6,*)'input=',trim(inputfilename)
-! unit cell
-  call getkeyvalue(inputfilename,"unit_vec",unit=ifin,status=ret)
-  write(*,*)'unit_vec (input)'
-  do i=1,3
-     read(ifin,*)ctmp,(uvin(i,j),j=1,3) ! hm in QMAS
-     write(*,"(3f23.16)")(uvin(i,j),j=1,3)
-  enddo   
-  close(ifin)
 
-  call getkeyvalue(inputfilename,"unit_vec_column",icolumn,default=1)
-  if (icolumn==2) then
-     QMD%uv=transpose(uvin)
-     write(*,*)'unit vector (column/raw): raw'
+  QMD%is_symmetrized=.false.
+  call getkeyvalue(inputfilename,"crystal",ciffilename,default="",unit=ifin,status=ret)
+  if( ciffilename /= "" ) then
+     call CIF_load(ciffilename)
+     call getkeyvalue(inputfilename,"symmetry",isymmetry,default=0)
+     QMD%is_symmetrized=isymmetry==1
   else
-     QMD%uv=uvin
-     write(*,*)'unit vector (column/raw): column'
-  endif   
+     ! unit cell
+     call getkeyvalue(inputfilename,"unit_vec",unit=ifin,status=ret)
+     write(*,*)'unit_vec (input)'
+     do i=1,3
+        read(ifin,*)ctmp,(uvin(i,j),j=1,3)
+        write(*,"(3f23.16)")(uvin(i,j),j=1,3)
+     enddo
+     close(ifin)
 
-  call getkeyvalue(inputfilename,"unit_length",ilength,default=1)
-  if (ilength==1) QMD%uv=QMD%uv/bohr
+     call getkeyvalue(inputfilename,"unit_vec_column",icolumn,default=1)
+     if (icolumn==2) then
+        QMD%uv=transpose(uvin)
+        write(*,*)'unit vector (column/raw): raw'
+     else
+        QMD%uv=uvin
+        write(*,*)'unit vector (column/raw): column'
+     endif
 
-  call getkeyvalue(inputfilename,"volume_scale",volscale,default=1.d0)
-  rscale=volscale**(1d0/3d0)
-  if (abs(rscale-1.d0).gt.1.d-6) then 
-     write(*,*)'volume_scale =',volscale
-     QMD%uv=QMD%uv*rscale
-  endif   
+     call getkeyvalue(inputfilename,"unit_length",ilength,default=1)
+     if (ilength==1) QMD%uv=QMD%uv/bohr
 
-! u1=QMD%uv(1:3,1)
-! u2=QMD%uv(1:3,2)
-! u3=QMD%uv(1:3,3)
+     call getkeyvalue(inputfilename,"volume_scale",volscale,default=1.d0)
+     rscale=volscale**(1d0/3d0)
+     if (abs(rscale-1.d0).gt.1.d-6) then 
+        write(*,*)'volume_scale =',volscale
+        QMD%uv=QMD%uv*rscale
+     endif
+
+     ! u1=QMD%uv(1:3,1)
+     ! u2=QMD%uv(1:3,2)
+     ! u3=QMD%uv(1:3,3)
+
+     call cross_x(QMD%uv(:,1),QMD%uv(:,2),QMD%bv(:,3))
+     call cross_x(QMD%uv(:,2),QMD%uv(:,3),QMD%bv(:,1))
+     call cross_x(QMD%uv(:,3),QMD%uv(:,1),QMD%bv(:,2))
+     QMD%omega=dot_product(QMD%bv(:,3),QMD%uv(:,3))
+     QMD%omegai=1.d0/QMD%omega
+     QMD%bv=QMD%bv*QMD%omegai
+     ! dot_product(ai,bj) = delta(i,j) <-- not 2pi*delta(i,j)
+
+     ! informtion of atoms
+     call getkeyvalue(inputfilename,"number_atom",QMD%natom,default=0)
+     allocate(QMD%ra(3,QMD%natom),QMD%rr(3,QMD%natom),QMD%iposfix(QMD%natom))
+     allocate(QMD%frc(3,QMD%natom),QMD%vrr(3,QMD%natom))
+     QMD%frc=0.d0
+     QMD%vrr=0.d0
+
+     call getkeyvalue(inputfilename,"number_element",QMD%nkatm,default=0)
+     allocate(QMD%zatm(QMD%natom),QMD%mass(QMD%natom),QMD%mfac(QMD%natom))
+     !  QMD%mconv=(1.6605655d-27/9.109534d-31)*0.5d0 ! Rydberg atomic units
+     QMD%mconv=(1.6605655d-27/9.109534d-31) ! Hartree atomic units
+
+     call getkeyvalue(inputfilename,"atom_pos",iatompos,default=1)
+
+     call getkeyvalue(inputfilename,"atom_list",unit=ifin,status=ret)
+     do i=1,QMD%natom
+        read(ifin,*)QMD%zatm(i),vtmp(1:3),QMD%iposfix(i)
+        if (iatompos==1) then
+           QMD%rr(:,i)=vtmp
+           QMD%ra(:,i)=matmul(QMD%uv,vtmp)
+        else
+           if (ilength==1) vtmp=vtmp/bohr
+           if (abs(rscale-1.d0).gt.1.d-6) then 
+              !           write(*,*)'volume_scale =',volscale
+              vtmp=vtmp*rscale
+           endif
+
+           QMD%ra(:,i)=vtmp
+           QMD%rr(:,i)=matmul(vtmp,QMD%bv)
+        endif
+     enddo
+     close(ifin)
+  end if ! ciffilename
+
   write(*,*)'unit vectors [Bohr]'
   write(*,"('u1 =',3f23.16)")QMD%uv(1:3,1)
   write(*,"('u2 =',3f23.16)")QMD%uv(1:3,2)
   write(*,"('u3 =',3f23.16)")QMD%uv(1:3,3)
-
-  call cross_x(QMD%uv(:,1),QMD%uv(:,2),QMD%bv(:,3))
-  call cross_x(QMD%uv(:,2),QMD%uv(:,3),QMD%bv(:,1))
-  call cross_x(QMD%uv(:,3),QMD%uv(:,1),QMD%bv(:,2))
-  QMD%omega=dot_product(QMD%bv(:,3),QMD%uv(:,3))
   write(*,*)'QMD%omega =',QMD%omega
-  QMD%omegai=1.d0/QMD%omega
-  QMD%bv=QMD%bv*QMD%omegai
-! dot_product(ai,bj) = delta(i,j) <-- not 2pi*delta(i,j)
 
-! informtion of atoms
-  call getkeyvalue(inputfilename,"number_atom",QMD%natom,default=0)
   write(*,*)'number of atoms =',QMD%natom
-  allocate(QMD%ra(3,QMD%natom),QMD%rr(3,QMD%natom),QMD%rro(3,QMD%natom,2),QMD%iposfix(QMD%natom))
-  allocate(QMD%frc(3,QMD%natom),QMD%frco(3,QMD%natom,2),QMD%vrr(3,QMD%natom))
-  QMD%frc=0.d0
-  QMD%vrr=0.d0
-
-  call getkeyvalue(inputfilename,"number_element",QMD%nkatm,default=0)
   write(*,*)'number of elements =',QMD%nkatm
-  allocate(QMD%zatm(QMD%natom),QMD%katm(QMD%natom),QMD%mass(QMD%natom),QMD%mfac(QMD%natom))
-!  QMD%mconv=(1.6605655d-27/9.109534d-31)*0.5d0 ! Rydberg atomic units
-  QMD%mconv=(1.6605655d-27/9.109534d-31) ! Hartree atomic units
-
-  call getkeyvalue(inputfilename,"atom_pos",iatompos,default=1)
-
-  call getkeyvalue(inputfilename,"atom_list",unit=ifin,status=ret)
-  do i=1,QMD%natom
-     read(ifin,*)QMD%zatm(i),vtmp(1:3),QMD%katm(i),QMD%iposfix(i)
-     if (iatompos==1) then
-        QMD%rr(:,i)=vtmp
-        QMD%ra(:,i)=matmul(QMD%uv,vtmp)
-     else
-        if (ilength==1) vtmp=vtmp/bohr
-        if (abs(rscale-1.d0).gt.1.d-6) then 
-!           write(*,*)'volume_scale =',volscale
-           vtmp=vtmp*rscale
-        endif
-
-        QMD%ra(:,i)=vtmp
-        QMD%rr(:,i)=matmul(vtmp,QMD%bv)
-     endif   
-  enddo   
-  close(ifin)
 
   write(*,*)'atom_list: lattice coordinate'
   do i=1,QMD%natom
-     write(*,"(i4,3f23.16,2i4)")QMD%zatm(i),(QMD%rr(j,i),j=1,3), &
-QMD%katm(i),QMD%iposfix(i)
+     write(*,"(i4,3f23.16,i4)")QMD%zatm(i),(QMD%rr(j,i),j=1,3), &
+          QMD%iposfix(i)
   enddo
 
   write(*,*)'atom_list: Cartesian coordinate [Bohr]'
   do i=1,QMD%natom
-     write(*,"(i4,3f23.16,2i4)")QMD%zatm(i),(QMD%ra(j,i),j=1,3), &
-QMD%katm(i),QMD%iposfix(i)
+     write(*,"(i4,3f23.16,i4)")QMD%zatm(i),(QMD%ra(j,i),j=1,3), &
+          QMD%iposfix(i)
   enddo
+
+  if (QMD%is_symmetrized) write(*,*)'symmetry on'
 
 ! optimization
   call getkeyvalue(inputfilename,"md_mode",QMD%imd,default=4)
@@ -125,9 +157,8 @@ QMD%katm(i),QMD%iposfix(i)
   call getkeyvalue(inputfilename,"number_max_relax",QMD%nloopa,default=10)
   write(*,*)'number_max_relax =',QMD%nloopa
 
-! cell_opt_mode in QMAS
   call getkeyvalue(inputfilename,"md_mode_cell",QMD%imdc,default=2)
-  write(*,*)'md_mode_cell =',QMD%imdc ! irlattice in QMAS
+  write(*,*)'md_mode_cell =',QMD%imdc
 
   call getkeyvalue(inputfilename,"number_max_relax_cell",QMD%nloopc,default=0)
   write(*,*)'number_max_relax_cell =',QMD%nloopc
@@ -151,18 +182,18 @@ QMD%katm(i),QMD%iposfix(i)
   call getkeyvalue(inputfilename,"th_stress",QMD%sth,default=5.d-7)
   write(*,*)'th_stress =',QMD%sth
 
-  call getkeyvalue(inputfilename,"cut_force",QMD%fcut,default=5.d-1)
-  write(*,*)'cut_force =',QMD%fcut
-
-  call getkeyvalue(inputfilename,"max_displacement",QMD%rdmax,default=0.25d0)
+  if (QMD%imdc==3) then ! RFC5
+     call getkeyvalue(inputfilename,"max_displacement",QMD%rdmax,default=0.10d0)
+  else
+     call getkeyvalue(inputfilename,"max_displacement",QMD%rdmax,default=0.25d0)
+  endif
   write(*,*)'max_displacement [Bohr] =',QMD%rdmax
 
   call getkeyvalue(inputfilename,"mass_scale",mscale,default=0)
   if (mscale==1) write(*,*)'mass_scale on'
 
-! lattice_mass in QMAS
   call getkeyvalue(inputfilename,"mass_cell",QMD%mcell,default=5.d-4)
-  write(*,*)'mass_cell =',QMD%mcell ! mltc in QMAS
+  write(*,*)'mass_cell =',QMD%mcell
 
 ! atom QMD%mass
   if (QMD%imd<=0.or.mscale==1) then
