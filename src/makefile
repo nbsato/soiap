@@ -3,7 +3,7 @@
 
 include make.inc
 
-OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o rfc5.o cif.o opt2_o_addtime.o adp_base_module.o adp_kwu14_module.o periodic_lattice_module.o
+OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o rfc5.o cif.o soiap_o_addtime.o adp_base_module.o adp_kwu14_module.o periodic_lattice_module.o
 
 .f.o:
 	$(FC) -c -o $@ $(FFLAGS_fixed) $*.f
@@ -12,10 +12,10 @@ OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show
 .F.o:
 	$(FC) -c -o $@ $(FFLAGS_fixed) $*.F
 
-all: opt2_o
+all: soiap
 
-opt2_o: $(OBJS_o)
-	$(FC) -o $@  $^ $(LIBS)
+soiap: $(OBJS_o)
+	$(FC) -o $@ $^ $(LIBS)
 
 atomrelax_o.o: parms_o.o cif.o
 
@@ -33,4 +33,4 @@ clean:
 	rm -f *.o *.mod 
 
 cleanprog:
-	rm -f opt2_o
+	rm -f soiap

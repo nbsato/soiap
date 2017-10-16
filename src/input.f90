@@ -1,3 +1,19 @@
+! ------------------------------------------------------------------------
+! Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+!
+! Licensed under the Apache License, Version 2.0 (the "License");
+! you may not use this file except in compliance with the License.
+! You may obtain a copy of the License at
+!
+!     http://www.apache.org/licenses/LICENSE-2.0
+!
+! Unless required by applicable law or agreed to in writing, software
+! distributed under the License is distributed on an "AS IS" BASIS,
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+! See the License for the specific language governing permissions and
+! limitations under the License.
+! ------------------------------------------------------------------------
+
 subroutine show_argument()
   implicit none
   write(6,*)
@@ -41,7 +57,7 @@ subroutine input
      call getkeyvalue(inputfilename,"unit_vec",unit=ifin,status=ret)
      write(*,*)'unit_vec (input)'
      do i=1,3
-        read(ifin,*)ctmp,(uvin(i,j),j=1,3) ! hm in QMAS
+        read(ifin,*)ctmp,(uvin(i,j),j=1,3)
         write(*,"(3f23.16)")(uvin(i,j),j=1,3)
      enddo
      close(ifin)
@@ -141,9 +157,8 @@ subroutine input
   call getkeyvalue(inputfilename,"number_max_relax",QMD%nloopa,default=10)
   write(*,*)'number_max_relax =',QMD%nloopa
 
-! cell_opt_mode in QMAS
   call getkeyvalue(inputfilename,"md_mode_cell",QMD%imdc,default=2)
-  write(*,*)'md_mode_cell =',QMD%imdc ! irlattice in QMAS
+  write(*,*)'md_mode_cell =',QMD%imdc
 
   call getkeyvalue(inputfilename,"number_max_relax_cell",QMD%nloopc,default=0)
   write(*,*)'number_max_relax_cell =',QMD%nloopc
@@ -177,9 +192,8 @@ subroutine input
   call getkeyvalue(inputfilename,"mass_scale",mscale,default=0)
   if (mscale==1) write(*,*)'mass_scale on'
 
-! lattice_mass in QMAS
   call getkeyvalue(inputfilename,"mass_cell",QMD%mcell,default=5.d-4)
-  write(*,*)'mass_cell =',QMD%mcell ! mltc in QMAS
+  write(*,*)'mass_cell =',QMD%mcell
 
 ! atom QMD%mass
   if (QMD%imd<=0.or.mscale==1) then

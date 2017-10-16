@@ -1,5 +1,21 @@
+! ------------------------------------------------------------------------
+! Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+!
+! Licensed under the Apache License, Version 2.0 (the "License");
+! you may not use this file except in compliance with the License.
+! You may obtain a copy of the License at
+!
+!     http://www.apache.org/licenses/LICENSE-2.0
+!
+! Unless required by applicable law or agreed to in writing, software
+! distributed under the License is distributed on an "AS IS" BASIS,
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+! See the License for the specific language governing permissions and
+! limitations under the License.
+! ------------------------------------------------------------------------
+
 !!----------------------------------------------------------------
-!! functions for read CIF in OpenMX Viewer
+!! functions for read CIF
 !!----------------------------------------------------------------
 module cif_module
   implicit none
@@ -842,9 +858,9 @@ contains
 
 
   !!----
-  !! set CIF values to OptSW global variables.
+  !! set CIF values to soiap global variables.
   !!----
-  subroutine CIF_setOptSW
+  subroutine CIF_setSoiap
     use paramlist
     integer :: ia
     logical :: symbol_found(103)
@@ -882,7 +898,7 @@ contains
     end do
 
     QMD%nkatm = count( symbol_found(:) )
-  end subroutine CIF_setOptSW
+  end subroutine CIF_setSoiap
 
   logical function CIF_canSymmetrize()
     CIF_canSymmetrize = allocated( cif%symmetrize )
@@ -941,7 +957,7 @@ contains
     call CIF_constructVector
     call CIF_constructAtom
     call CIF_constructSymmetrize
-    call CIF_setOptSW
+    call CIF_setSoiap
     
   end subroutine CIF_load
 

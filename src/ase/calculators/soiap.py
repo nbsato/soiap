@@ -1,6 +1,22 @@
-""" OptSW potential."""
+# ------------------------------------------------------------------------
+# Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# ------------------------------------------------------------------------
 
-# [note] set environmental variable OPTSW_COMMAND for opt2 command
+""" Soiap potential."""
+
+# [note] set environmental variable SOIAP_COMMAND for soiap command
 
 import os
 import numpy as np
@@ -8,8 +24,8 @@ import numpy as np
 import ase
 from ase.calculators.calculator import Calculator, all_changes
 
-#---- calculation class for OptSW
-class OptSW(Calculator):
+#---- calculation class for soiap
+class Soiap(Calculator):
 
     implemented_properties = ["energy", "forces", "stress"]
 
@@ -103,15 +119,15 @@ class OptSW(Calculator):
     #---- run the solver
     def run(self):
         # exec the solver
-        if "OPTSW_COMMAND" in os.environ:
-            optsw = os.environ["OPTSW_COMMAND"]
-            exitcode = os.system("%s input > log.stdout" % optsw )
+        if "SOIAP_COMMAND" in os.environ:
+            soiap = os.environ["SOIAP_COMMAND"]
+            exitcode = os.system("%s input > log.stdout" % soiap )
         else:
-            raise RuntimeError("Please set OPTSW_COMMAND environment variable")
+            raise RuntimeError("Please set SOIAP_COMMAND environment variable")
         # end if
 
         if exitcode != 0:
-            raise RuntimeError("OptSW exited with exit code: %d.  " % exitcode)
+            raise RuntimeError("Soiap exited with exit code: %d.  " % exitcode)
         # end if
     # end def run
 
@@ -272,4 +288,4 @@ class OptSW(Calculator):
         self.results["stress"] = stress
     # end def read_stress
 
-# end class OptSW
+# end class Soiap

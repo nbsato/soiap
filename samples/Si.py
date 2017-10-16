@@ -1,6 +1,6 @@
 from ase import Atoms
 from ase.build import bulk
-from ase.calculators.optsw import OptSW
+from ase.calculators.soiap import Soiap
 from ase.constraints import FixAtoms
 
 atoms = bulk('Si', 'diamond', a=6.429, cubic=True)
@@ -9,7 +9,7 @@ atoms = bulk('Si', 'diamond', a=6.429, cubic=True)
 #constraint.append( FixAtoms(indices=[3,4]) )
 #atoms.set_constraint( constraint )
 
-calc = OptSW(
+calc = Soiap(
   number_max_relax=50,
   md_mode=0,
   number_max_relax_cell=100,

@@ -1,9 +1,25 @@
+! ------------------------------------------------------------------------
+! Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+!
+! Licensed under the Apache License, Version 2.0 (the "License");
+! you may not use this file except in compliance with the License.
+! You may obtain a copy of the License at
+!
+!     http://www.apache.org/licenses/LICENSE-2.0
+!
+! Unless required by applicable law or agreed to in writing, software
+! distributed under the License is distributed on an "AS IS" BASIS,
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+! See the License for the specific language governing permissions and
+! limitations under the License.
+! ------------------------------------------------------------------------
+
 module paramlist
 
   real*8 :: bohr,kcalpermol,hartree,tol
   parameter (bohr=0.529177249d0, kcalpermol=627.503d0, hartree=27.2116d0)
   parameter (tol=1.d-12)
-type t_qmasmd
+type t_qmd
 
   integer :: natom,nloopa,nloopc,loopa,loopc,imd,imdc,isd_cell
   integer :: nkatm
@@ -27,5 +43,5 @@ type t_qmasmd
   real*8 :: fire_finc,fire_fdec,fire_alp,fire_alp0,fire_falp,fire_dtmax
 
 end type
-type(t_qmasmd):: QMD
+type(t_qmd):: QMD
 end module paramlist

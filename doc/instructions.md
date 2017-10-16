@@ -9,23 +9,23 @@ Requirement
 Installation
 ------------
 
-You can install **opt_cl2** by
+You can install **soiap** by
 
-1. cloning the Git repository,
-2. switching to the branch `develop`,
+1. cloning the [GitHub repository](https://github.com/nbsato/soiap),
+2. switching to the branch `master`,
 3. moving in the directory `src`,
 4. editing `make.inc`, and
 5. running `make`.
 
-An executable file `opt2_o` is created in the directory `src`.
+The executable file `soiap` is created in the directory `src`.
 
 Usage
 -----
 
-The following command executes **opt_cl2**:
+The following command executes **soiap**:
 
 ~~~
-opt2_o <input>
+soiap <input>
 ~~~
 
 where `<input>` is the input file described below. Output files, which are also 
@@ -36,7 +36,7 @@ Input file
 ----------
 
 Words after `!` are recognized as comments in the input file. Four samples are 
-shown here. They are contained in the directory `work/samples`.
+shown here. They are contained in the directory `samples`.
 
 ### Sample 1: manually given initial structure
 
@@ -116,8 +116,8 @@ force_field 1 ! force field
 ### Sample 3: variable-cell relaxation by the RFC5 method
 
 The original RFC5 method relaxes the cell and atoms simultaneously. Within the 
-implementation in **opt_cl2**, the cell and atoms are relaxed simultaneously 
-only at the first atom-relaxation iteration of each cell-relaxation loop. 
+implementation in **soiap**, the cell and atoms are relaxed simultaneously only 
+at the first atom-relaxation iteration of each cell-relaxation loop. 
 Therefore, if you want to performe a variable-cell relaxation as is the original
 RFC5 method, `number_max_relax` should be set to one. The cell and atoms are 
 then relaxed simultaneously in all the iterations. See FAQ for details.
@@ -143,7 +143,7 @@ force_field 1 ! force field
 
 ### Sample 4: fixed-cell relaxation by the RFC5 method
 
-Within the implementation of the RFC5 method in **opt_cl2**, the cell and atoms 
+Within the implementation of the RFC5 method in **soiap**, the cell and atoms 
 are relaxed simultaneously at the first atom-relaxation iteration of each cell-
 relaxation loop other than the first cell-relaxation iteration. Therefore, if 
 `number_max_relax_cell` is set to one, the cell is not relaxed. See FAQ for 
@@ -232,7 +232,7 @@ If both `number_max_relax_cell` and `number_max_relax` are set to one, the cell
 and atoms are not relaxed. Quantities only of the initial structure are 
 outputted. See the next topic for details.
 
-### When does **opt_cl2** relax the cell and atoms?
+### When does **soiap** relax the cell and atoms?
 
 For the RFC5 method,
 

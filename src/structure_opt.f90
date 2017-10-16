@@ -1,7 +1,18 @@
-!!!!! subroutines for relaxing atomic positions 
-
-! for the time being, use atomrelax_qmas_o.f
-
+! ------------------------------------------------------------------------
+! Copyright (C) 2017 Nobuya Sato, Hiori Kino, and Takashi Miyake
+!
+! Licensed under the Apache License, Version 2.0 (the "License");
+! you may not use this file except in compliance with the License.
+! You may obtain a copy of the License at
+!
+!     http://www.apache.org/licenses/LICENSE-2.0
+!
+! Unless required by applicable law or agreed to in writing, software
+! distributed under the License is distributed on an "AS IS" BASIS,
+! WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+! See the License for the specific language governing permissions and
+! limitations under the License.
+! ------------------------------------------------------------------------
 
 !!!!! subroutines for optimizing the unit cell
 subroutine latticerelax
@@ -116,7 +127,6 @@ subroutine lattice_simple_relax
 end subroutine lattice_simple_relax
 
 subroutine latticerelax_sd
-! modified from latticerelax_cg in QMAS
   use paramlist
   integer i,j,k
   real*8 lambt1,lambt2,lambu1,lambu2,lambda,dtmp1,dtmp2,gamma
