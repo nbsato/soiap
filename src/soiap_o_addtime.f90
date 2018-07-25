@@ -128,7 +128,9 @@ contains
        call ZRL
     elseif (QMD%ifrcf==4) then ! ADP for Nd-Fe-B
        call ADP_KWU14
-    else   
+    elseif (QMD%ifrcf==5) then ! Jmatgen potential
+      call Jmatgen
+    else
        stop 'etot_frc_strs error'
     endif
 

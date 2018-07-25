@@ -26,6 +26,7 @@ subroutine input
   use keyvalue
   use paramlist
   use cif_module
+  use m_jmatgen, only: initJmatgen
 
   implicit none
 
@@ -36,6 +37,8 @@ subroutine input
 
   character(120):: inputfilename
   character(120):: ciffilename
+  character(256):: config_jmatgen_energy
+  character(256):: config_jmatgen_force
   integer:: narg
 
   narg=command_argument_count()
@@ -212,6 +215,17 @@ subroutine input
 ! force field
   call getkeyvalue(inputfilename,"force_field",QMD%ifrcf,default=0)
   write(*,*)'force_field =',QMD%ifrcf
+
+! Jmatgen
+  if (QMD%ifrcf==5) then
+    call getkeyvalue(inputfilename,"config_jmatgen_energy",config_jmatgen_energy,default="")
+    call getkeyvalue(inputfilename,"config_jmatgen_force",config_jmatgen_force,default="")
+    write(*,*)'config_jmatgen_energy=',trim(config_jmatgen_energy)
+    write(*,*)'config_jmatgen_force=',trim(config_jmatgen_force)
+    if (config_jmatgen_energy/="".and.config_jmatgen_energy/="") then
+      call initJmatgen(config_jmatgen_energy,config_jmatgen_force)
+    endif
+  endif
 
 end subroutine input      
 

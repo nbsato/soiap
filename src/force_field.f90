@@ -1281,5 +1281,92 @@ subroutine ADP_KWU14
   QMD%strs=QMD%strs/hartree*bohr**3 ! eV/Ang^3 to Hartree/Bohr^3
 
 end subroutine ADP_KWU14
+!--------1---------2---------3---------4---------5---------6---------7--
+!--------1---------2---------3---------4---------5---------6---------7--
+subroutine Jmatgen
+  use m_jmatgen, only: calcJmatgen
+
+  integer :: natom
+  real*8 :: cell(3,3)
+  character(len=4) :: atom(QMD%natom)
+  real*8 :: coord(3,QMD%natom)
+  real*8 :: energy
+  real*8 :: force(3,QMD%natom)
+  real*8 :: virial(3,3)
+  real*8 :: stress(3,3)
+
+  integer :: ia
+
+! initialize
+  natom = QMD%natom
+  cell = QMD%uv*bohr ! Bohr to Ang
+  do ia=1,natom
+    atom = getAtomicName(QMD%zatm(ia)) ! Element number to Element name
+  enddo
+  coord = QMD%ra*bohr  ! Bohr to Ang
+  energy = 0.d0 ! eV
+  force = 0.d0 ! Hartree/Bohr
+  virial = 0.d0 ! Hartree
+
+! calculate
+  call calcJmatgen(natom, cell, atom, coord, energy, force, virial)
+  stress = virial/QMD%omega ! Hartree/Bohr^3
+
+! total
+  QMD%tote = energy/hartree ! eV to Hartree
+  QMD%frc = force ! Hartree/Bohr
+  QMD%strs = stress ! Hartree/Bohr^3
+
+contains
+  !!----------------
+  !! functions for element name.
+  !!----------------
+  function getAtomicName( number ) result(symbol)
+    integer, intent(in) :: number
+    character(len=4) :: symbol
+
+    select case( number )
+    case( 1); symbol= "H"; case( 2); symbol="He"; case( 3); symbol="Li";
+    case( 4); symbol="Be"; case( 5); symbol= "B"; case( 6); symbol= "C";
+    case( 7); symbol= "N"; case( 8); symbol= "O"; case( 9); symbol= "F";
+    case(10); symbol="Ne"; case(11); symbol="Na"; case(12); symbol="Mg";
+    case(13); symbol="Al"; case(14); symbol="Si"; case(15); symbol= "P";
+    case(16); symbol= "S"; case(17); symbol="Cl"; case(18); symbol="Ar";
+    case(19); symbol= "K"; case(20); symbol="Ca"; case(21); symbol="Sc";
+    case(22); symbol="Ti"; case(23); symbol= "V"; case(24); symbol="Cr";
+    case(25); symbol="Mn"; case(26); symbol="Fe"; case(27); symbol="Co";
+    case(28); symbol="Ni"; case(29); symbol="Cu"; case(30); symbol="Zn";
+    case(31); symbol="Ga"; case(32); symbol="Ge"; case(33); symbol="As";
+    case(34); symbol="Se"; case(35); symbol="Br"; case(36); symbol="Kr";
+    case(37); symbol="Rb"; case(38); symbol="Sr"; case(39); symbol= "Y";
+    case(40); symbol="Zr"; case(41); symbol="Nb"; case(42); symbol="Mo";
+    case(43); symbol="Tc"; case(44); symbol="Ru"; case(45); symbol="Rh";
+    case(46); symbol="Pd"; case(47); symbol="Ag"; case(48); symbol="Cd";
+    case(49); symbol="In"; case(50); symbol="Sn"; case(51); symbol="Sb";
+    case(52); symbol="Te"; case(53); symbol= "I"; case(54); symbol="Xe";
+    case(55); symbol="Cs"; case(56); symbol="Ba"; case(57); symbol="La";
+    case(58); symbol="Ce"; case(59); symbol="Pr"; case(60); symbol="Nd";
+    case(61); symbol="Pm"; case(62); symbol="Sm"; case(63); symbol="Eu";
+    case(64); symbol="Gd"; case(65); symbol="Tb"; case(66); symbol="Dy";
+    case(67); symbol="Ho"; case(68); symbol="Er"; case(69); symbol="Tm";
+    case(70); symbol="Yb"; case(71); symbol="Lu"; case(72); symbol="Hf";
+    case(73); symbol="Ta"; case(74); symbol= "W"; case(75); symbol="Re";
+    case(76); symbol="Os"; case(77); symbol="Ir"; case(78); symbol="Pt";
+    case(79); symbol="Au"; case(80); symbol="Hg"; case(81); symbol="Tl";
+    case(82); symbol="Pb"; case(83); symbol="Bi"; case(84); symbol="Po";
+    case(85); symbol="At"; case(86); symbol="Rn"; case(87); symbol="Fr";
+    case(88); symbol="Ra"; case(89); symbol="Ac"; case(90); symbol="Th";
+    case(91); symbol="Pa"; case(92); symbol= "U"; case(93); symbol="Np";
+    case(94); symbol="Pu"; case(95); symbol="Am"; case(96); symbol="Cm";
+    case(97); symbol="Bk"; case(98); symbol="Cf"; case(99); symbol="Es";
+    case(100); symbol="Fm"; case(101); symbol="Md"; case(102); symbol="No";
+    case(103); symbol="Lr";    
+    case default
+       write(*,'(a,i8)') '# Error!: unknown element number:', number 
+       stop
+    end select
+  end function getAtomicName
+
+end subroutine Jmatgen
 
 end module
