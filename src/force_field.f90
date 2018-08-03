@@ -1360,9 +1360,9 @@ contains
     case(94); symbol="Pu"; case(95); symbol="Am"; case(96); symbol="Cm";
     case(97); symbol="Bk"; case(98); symbol="Cf"; case(99); symbol="Es";
     case(100); symbol="Fm"; case(101); symbol="Md"; case(102); symbol="No";
-    case(103); symbol="Lr";    
+    case(103); symbol="Lr";
     case default
-       write(*,'(a,i8)') '# Error!: unknown element number:', number 
+       write(*,'(a,i8)') '# Error!: unknown element number:', number
        stop
     end select
   end function getAtomicName
