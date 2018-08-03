@@ -218,13 +218,11 @@ subroutine input
 
 ! Jmatgen
   if (QMD%ifrcf==5) then
-    call getkeyvalue(inputfilename,"config_jmatgen_energy",config_jmatgen_energy,default="")
+    call getkeyvalue(inputfilename,"config_jmatgen_energy",config_jmatgen_energy)
     call getkeyvalue(inputfilename,"config_jmatgen_force",config_jmatgen_force,default="")
     write(*,*)'config_jmatgen_energy=',trim(config_jmatgen_energy)
     write(*,*)'config_jmatgen_force=',trim(config_jmatgen_force)
-    if (config_jmatgen_energy/="".and.config_jmatgen_force/="") then
-      call initJmatgen(config_jmatgen_energy,config_jmatgen_force)
-    endif
+    call initJmatgen(config_jmatgen_energy,config_jmatgen_force)
   endif
 
 end subroutine input      
