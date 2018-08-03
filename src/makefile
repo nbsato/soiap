@@ -3,9 +3,8 @@
 
 include make.inc
 
-PATH_jmatgen = ../../jmatgen/src
-LIB_jmatgen =  -L$(PATH_jmatgen) -ljmatgen
-FFLAGS_jmatgen = -I$(PATH_jmatgen)
+LIBS_jmatgen = $(JMATGEN_ROOT)/src/libjmatgen.a
+FFLAGS_jmatgen = -I$(JMATGEN_ROOT)/src
 
 OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o rfc5.o cif.o soiap_o_addtime.o adp_base_module.o adp_kwu14_module.o periodic_lattice_module.o
 
@@ -17,22 +16,22 @@ OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show
 all: soiap
 
 soiap: $(OBJS_o)
-	$(FC) -o $@ $^ $(LIB_jmatgen) $(LIBS)
+	$(FC) -o $@ $^ $(LIBS_jmatgen) $(LIBS)
 
 atomrelax_o.o: parms_o.o cif.o
 
-force_field.o: parms_o.o algebra.o adp_kwu14_module.o periodic_lattice_module.o $(PATH_jmatgen)/libjmatgen.a
+force_field.o: parms_o.o algebra.o adp_kwu14_module.o periodic_lattice_module.o $(LIBS_jmatgen)
 
 input.o: keyvalue.o parms_o.o cif.o
 
-structure_opt.o: parms_o.o 
+structure_opt.o: parms_o.o
 
 adp_base_module.o: periodic_lattice_module.o
 
 adp_kwu14_module.o: adp_base_module.o
 
 clean:
-	rm -f *.o *.mod 
+	rm -f *.o *.mod
 
 cleanprog:
 	rm -f soiap
