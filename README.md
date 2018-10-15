@@ -6,12 +6,13 @@ Structure Optimization with InterAtomic Potential
 Latest version
 --------------
 
-version 0.1.0, released on October 16th, 2017
+version 0.2.0, released on October 15th, 2018
 
 Requirement
 -----------
 
 - Fortran compiler supporting the Fortran 2003 standard
+- LAPACK
 
 Usage
 -----

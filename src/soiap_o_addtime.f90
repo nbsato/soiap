@@ -25,7 +25,7 @@ program main
   integer:: loopa,loopc
   type(t_showtime)::  timer
 
-  write(*,*)'soiap version 0.1.0'
+  write(*,*)'soiap version 0.2.0'
   write(*,*)
 
   open(901,file='log.struc',form='formatted')
@@ -122,13 +122,15 @@ contains
     if (QMD%ifrcf==1) then ! Stillinger-Weber for Si
        call Stillinger_Weber
     elseif (QMD%ifrcf==2) then ! Tsuneyuki potential for Si-O
-       stop 'Tsuneyuki potential is under debug'
+       !stop 'Tsuneyuki potential is under debug'
        call Tsuneyuki
     elseif (QMD%ifrcf==3) then ! ZRL potential for Si-O
        call ZRL
     elseif (QMD%ifrcf==4) then ! ADP for Nd-Fe-B
        call ADP_KWU14
-    else   
+    elseif (QMD%ifrcf==5) then ! Jmatgen potential
+      call Jmatgen
+    else
        stop 'etot_frc_strs error'
     endif
 

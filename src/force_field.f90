@@ -291,22 +291,24 @@ subroutine Tsuneyuki
 
   integer :: i,j,k
   real*8 :: tote2,frc2(3,QMD%natom),strs2(3,3)
+  real*8 :: toteEwald,frcEwald(3,QMD%natom),strsEwald(3,3)
   real*8 :: rri(3),rrj(3)
   real*8 :: rrij(3),raij(3),dij
   real*8 :: toteij,frcijr,vtmp(3)
-  real*8 :: sigma,eps,e1,e2,e3,vol,rho,faemp
-  parameter (sigma=3.959164919d0) ! in Bohr
-  parameter (eps=7.968005097d-2) ! In Hartree
+  real*8 :: toteijEwald,frcijEwald(3),strsijEwald(3,3)
+  !real*8 :: sigma,eps,e1,e2,e3,vol,rho,faemp
+  !parameter (sigma=3.959164919d0) ! in Bohr
+  !parameter (eps=7.968005097d-2) ! In Hartree
 
   tote2=0.d0
   frc2=0.d0
   strs2=0.d0
-!$omp parallel do private(rri,rrj,rrij,raij,dij,frcijr,vtmp,frc2), reduction(+:tote2,strs2) ,  schedule(dynamic,2)
+!$omp parallel do private(rri,rrj,rrij,raij,dij,frcijr,vtmp,j,k), reduction(+:tote2,frc2,strs2) ,  schedule(dynamic,2)
   do i=1,QMD%natom-1
      if (QMD%zatm(i)/=8.and.QMD%zatm(i)/=14) stop 'Tsuneyuki: zatm(i) error'
   do j=i+1,QMD%natom
      if (QMD%zatm(j)/=8.and.QMD%zatm(j)/=14) stop 'Tsuneyuki: zatm(j) error'
-     if (QMD%zatm(j)==14.and.QMD%zatm(j)==14) cycle
+     if (QMD%zatm(i)==14.and.QMD%zatm(j)==14) cycle
      rri=QMD%rr(:,i)
      rrj=QMD%rr(:,j)
 !     call frac_diff_min(rri,rrj,rrij) ! rrij = rri - rrj
@@ -324,10 +326,30 @@ subroutine Tsuneyuki
   enddo ! j
   enddo ! i
 
+  toteEwald=0.d0
+  frcEwald=0.d0
+  strsEwald=0.d0
+!$omp parallel do private(rri,rrj,rrij,raij,toteijEwald,frcijEwald,strsijEwald,j), reduction(+:toteEwald,frcEwald,strsEwald) ,  schedule(dynamic,2)
+  do i=1,QMD%natom
+     if (QMD%zatm(i)/=8.and.QMD%zatm(i)/=14) stop 'Tsuneyuki: zatm(i) error'
+  do j=1,QMD%natom
+     if (QMD%zatm(j)/=8.and.QMD%zatm(j)/=14) stop 'Tsuneyuki: zatm(j) error'
+     if (QMD%zatm(i)==14.and.QMD%zatm(j)==14) cycle
+     rri=QMD%rr(:,i)
+     rrj=QMD%rr(:,j)
+     rrij=rrj-rri
+     raij=matmul(QMD%uv,rrij)
+     call Tsuneyuki_Ewald(QMD%zatm(i),QMD%zatm(j),raij,toteijEwald,frcijEwald,strsijEwald)
+     toteEwald=toteEwald+0.5d0*toteijEwald
+     frcEwald(:,i)=frcEwald(:,i)-frcijEwald
+     strsEwald=strsEwald+0.5d0*strsijEwald
+  enddo ! j
+  enddo ! i
+
 ! total
-  QMD%tote=tote2
-  QMD%frc=frc2
-  QMD%strs=strs2/QMD%omega
+  QMD%tote=tote2+toteEwald
+  QMD%frc=frc2+frcEwald
+  QMD%strs=(strs2+strsEwald)/QMD%omega
 
 !  write(*,*)'frc'
 !  do i=1,QMD%natom
@@ -393,10 +415,12 @@ subroutine Tsuneyuki_Uij(zatmi,zatmj,r,tote2,frc2r)
      Uij2=Uij2/kcalpermol
      dUij2=dUij2*bohr/kcalpermol
 
-! Coulomb part: atomic units
-     UijCoul=qti*qtj*(1.d0-gij)/r+qi*qj*gij/r
-     dUijCoul=-qti*qtj*(1.d0-gij)/(r**2)-qti*qtj*dgij/r &
-              -qi*qj*gij/(r**2)+qi*qj*dgij/r
+! Coulomb(short) part: atomic units
+!     UijCoul=qti*qtj*(1.d0-gij)/r+qi*qj*gij/r
+!     dUijCoul=-qti*qtj*(1.d0-gij)/(r**2)-qti*qtj*dgij/r &
+!              -qi*qj*gij/(r**2)+qi*qj*dgij/r
+     UijCoul=-qti*qtj*gij/r+qi*qj*gij/r
+     dUijCoul=qti*qtj*gij/(r**2)-qti*qtj*dgij/r-qi*qj*gij/(r**2)+qi*qj*dgij/r
 !
      Uij=UijCoul+Uij2
 !!     Uij=UijCoul
@@ -407,6 +431,43 @@ subroutine Tsuneyuki_Uij(zatmi,zatmj,r,tote2,frc2r)
 !  endif
   return
 end subroutine Tsuneyuki_Uij
+
+subroutine Tsuneyuki_Ewald(zatmi,zatmj,rij,toteEwald,frcEwald,strsEwald)
+  use ewald_module, only: M_PI, calcPotentialEwald, calcForceEwald, calcStressEwald
+  implicit none
+  integer,intent(in):: zatmi,zatmj
+  real*8,intent(in):: rij(3)
+  real*8,intent(out):: toteEwald,frcEwald(3),strsEwald(3,3)
+  logical:: lpair
+!
+  real*8 ai,aj,bi,bj,ci,cj,qi,qti,qj,qtj
+!=======================================================================
+  lpair=.false.
+  if ((zatmi.eq.8.and.zatmj.eq.14).or.(zatmi.eq.14.and.zatmj.eq.8)) then
+    lpair=.true.
+  endif
+  if (zatmi.eq.8.and.zatmj.eq.8) then
+    lpair=.true.
+  endif
+
+  if (.not.lpair) then
+    toteEwald=0.d0
+    frcEwald=0.d0
+    return
+  endif
+
+  call Tsuneyuki_Param(zatmi,ai,bi,ci,qi,qti)
+  call Tsuneyuki_Param(zatmj,aj,bj,cj,qj,qtj)
+
+! Coulomb(long) part: atomic units
+  call calcPotentialEwald(toteEwald,rij,QMD%uv,2.0d0*M_PI*QMD%bv,QMD%omega)
+  call calcForceEwald(frcEwald,rij,QMD%uv,2.0d0*M_PI*QMD%bv,QMD%omega)
+  call calcStressEwald(strsEwald,rij,QMD%uv,2.0d0*M_PI*QMD%bv,QMD%omega)
+  toteEwald=qti*qtj*toteEwald
+  frcEwald=-qti*qtj*frcEwald
+  strsEwald=qti*qtj*strsEwald
+  return
+end subroutine Tsuneyuki_Ewald
 
 subroutine Tsuneyuki_Param(z,a,b,c,q,qt)
   implicit none
@@ -1281,5 +1342,92 @@ subroutine ADP_KWU14
   QMD%strs=QMD%strs/hartree*bohr**3 ! eV/Ang^3 to Hartree/Bohr^3
 
 end subroutine ADP_KWU14
+!--------1---------2---------3---------4---------5---------6---------7--
+!--------1---------2---------3---------4---------5---------6---------7--
+subroutine Jmatgen
+  use m_jmatgen, only: calcJmatgen
+
+  integer :: natom
+  real*8 :: cell(3,3)
+  character(len=4) :: atom(QMD%natom)
+  real*8 :: coord(3,QMD%natom)
+  real*8 :: energy
+  real*8 :: force(3,QMD%natom)
+  real*8 :: virial(3,3)
+  real*8 :: stress(3,3)
+
+  integer :: ia
+
+! initialize
+  natom = QMD%natom
+  cell = QMD%uv*bohr ! Bohr to Ang
+  do ia=1,natom
+    atom = getAtomicName(QMD%zatm(ia)) ! Element number to Element name
+  enddo
+  coord = QMD%ra*bohr  ! Bohr to Ang
+  energy = 0.d0 ! eV
+  force = 0.d0 ! Hartree/Bohr
+  virial = 0.d0 ! Hartree
+
+! calculate
+  call calcJmatgen(natom, cell, atom, coord, energy, force, virial)
+  stress = virial/QMD%omega ! Hartree/Bohr^3
+
+! total
+  QMD%tote = energy/hartree ! eV to Hartree
+  QMD%frc = force ! Hartree/Bohr
+  QMD%strs = stress ! Hartree/Bohr^3
+
+contains
+  !!----------------
+  !! functions for element name.
+  !!----------------
+  function getAtomicName( number ) result(symbol)
+    integer, intent(in) :: number
+    character(len=4) :: symbol
+
+    select case( number )
+    case( 1); symbol= "H"; case( 2); symbol="He"; case( 3); symbol="Li";
+    case( 4); symbol="Be"; case( 5); symbol= "B"; case( 6); symbol= "C";
+    case( 7); symbol= "N"; case( 8); symbol= "O"; case( 9); symbol= "F";
+    case(10); symbol="Ne"; case(11); symbol="Na"; case(12); symbol="Mg";
+    case(13); symbol="Al"; case(14); symbol="Si"; case(15); symbol= "P";
+    case(16); symbol= "S"; case(17); symbol="Cl"; case(18); symbol="Ar";
+    case(19); symbol= "K"; case(20); symbol="Ca"; case(21); symbol="Sc";
+    case(22); symbol="Ti"; case(23); symbol= "V"; case(24); symbol="Cr";
+    case(25); symbol="Mn"; case(26); symbol="Fe"; case(27); symbol="Co";
+    case(28); symbol="Ni"; case(29); symbol="Cu"; case(30); symbol="Zn";
+    case(31); symbol="Ga"; case(32); symbol="Ge"; case(33); symbol="As";
+    case(34); symbol="Se"; case(35); symbol="Br"; case(36); symbol="Kr";
+    case(37); symbol="Rb"; case(38); symbol="Sr"; case(39); symbol= "Y";
+    case(40); symbol="Zr"; case(41); symbol="Nb"; case(42); symbol="Mo";
+    case(43); symbol="Tc"; case(44); symbol="Ru"; case(45); symbol="Rh";
+    case(46); symbol="Pd"; case(47); symbol="Ag"; case(48); symbol="Cd";
+    case(49); symbol="In"; case(50); symbol="Sn"; case(51); symbol="Sb";
+    case(52); symbol="Te"; case(53); symbol= "I"; case(54); symbol="Xe";
+    case(55); symbol="Cs"; case(56); symbol="Ba"; case(57); symbol="La";
+    case(58); symbol="Ce"; case(59); symbol="Pr"; case(60); symbol="Nd";
+    case(61); symbol="Pm"; case(62); symbol="Sm"; case(63); symbol="Eu";
+    case(64); symbol="Gd"; case(65); symbol="Tb"; case(66); symbol="Dy";
+    case(67); symbol="Ho"; case(68); symbol="Er"; case(69); symbol="Tm";
+    case(70); symbol="Yb"; case(71); symbol="Lu"; case(72); symbol="Hf";
+    case(73); symbol="Ta"; case(74); symbol= "W"; case(75); symbol="Re";
+    case(76); symbol="Os"; case(77); symbol="Ir"; case(78); symbol="Pt";
+    case(79); symbol="Au"; case(80); symbol="Hg"; case(81); symbol="Tl";
+    case(82); symbol="Pb"; case(83); symbol="Bi"; case(84); symbol="Po";
+    case(85); symbol="At"; case(86); symbol="Rn"; case(87); symbol="Fr";
+    case(88); symbol="Ra"; case(89); symbol="Ac"; case(90); symbol="Th";
+    case(91); symbol="Pa"; case(92); symbol= "U"; case(93); symbol="Np";
+    case(94); symbol="Pu"; case(95); symbol="Am"; case(96); symbol="Cm";
+    case(97); symbol="Bk"; case(98); symbol="Cf"; case(99); symbol="Es";
+    case(100); symbol="Fm"; case(101); symbol="Md"; case(102); symbol="No";
+    case(103); symbol="Lr";
+    case default
+       write(*,'(a,i8)') '# Error!: unknown element number:', number
+       stop
+    end select
+  end function getAtomicName
+
+end subroutine Jmatgen
 
 end module
