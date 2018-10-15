@@ -25,7 +25,7 @@ program main
   integer:: loopa,loopc
   type(t_showtime)::  timer
 
-  write(*,*)'soiap version 0.1.0'
+  write(*,*)'soiap version 0.2.0'
   write(*,*)
 
   open(901,file='log.struc',form='formatted')
