@@ -5,6 +5,7 @@ Requirement
 -----------
 
 - Fortran compiler supporting the Fortran 2003 standard
+- LAPACK
 
 Installation
 ------------
@@ -28,14 +29,14 @@ The following command executes **soiap**:
 soiap <input>
 ~~~
 
-where `<input>` is the input file described below. Output files, which are also 
-described below, are created in the current directory. Progress of the command 
+where `<input>` is the input file described below. Output files, which are also
+described below, are created in the current directory. Progress of the command
 is written in the standard output.
 
 Input file
 ----------
 
-Words after `!` are recognized as comments in the input file. Four samples are 
+Words after `!` are recognized as comments in the input file. Four samples are
 shown here. They are contained in the directory `samples`.
 
 ### Sample 1: manually given initial structure
@@ -61,7 +62,8 @@ atom_list ! list of atoms
 14  0    0    0     0 ! atomic number, x, y, z, fix
 14  0.25 0.25 0.25  1 ! atomic number, x, y, z, relax
 
-md_mode_cell 2 ! cell-relaxation method; 0: FIRE, 2: quenched MD, or 3: RFC5
+md_mode_cell 2 ! cell-relaxation method
+               ! 0: FIRE, 2: quenched MD, or 3: RFC5
 number_max_relax_cell 100 ! max. number of the cell relaxation
 mass_cell 17202.4d-2 ! cell "mass" in (electron mass)/Bohr
 
@@ -71,7 +73,8 @@ number_max_relax 100 ! max. number of the atom relaxation
 mass_scale 0 ! 0: do nothing or 1: rescale the atomic masses to that of C
 max_displacement 0.25 ! max. displacement of atoms in Bohr
 
-unit_time 1 ! unit of the time step; 1: fs or 2: Hartree a.u.
+unit_time 1 ! unit of the time step
+            ! 1: fs or 2: Hartree a.u.
 time_step 1.0 ! time step
 
 external_stress_v 0.0 0.0 0.0 ! external pressure in GPa
@@ -80,8 +83,8 @@ th_force 5d-5 ! convergence threshold for the force in Hartree a.u.
 th_stress 5d-7 ! convergence threshold for the stress in Hartree a.u.
 
 force_field 1 ! force field
-              ! 1: Stillinger-Weber for Si, 3: ZRL for Si-O-N-H, or 
-              ! 4: ADP for Nd-Fe-B
+              ! 1: Stillinger-Weber for Si, 2: Tsuneyuki potential for SiO2,
+              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, or 5: Jmatgen
 ~~~
 
 ### Sample 2: initial structure given by a CIF file
@@ -90,7 +93,8 @@ force_field 1 ! force field
 crystal initial.cif ! CIF file for the initial structure
 symmetry 0 ! 0: not symmetrize displacements of the atoms or 1: symmetrize
 
-md_mode_cell 2 ! cell-relaxation method; 0: FIRE, 2: quenched MD, or 3: RFC5
+md_mode_cell 2 ! cell-relaxation method
+               ! 0: FIRE, 2: quenched MD, or 3: RFC5
 number_max_relax_cell 100 ! max. number of the cell relaxation
 mass_cell 17202.4d-2 ! cell "mass" in (electron mass)/Bohr
 
@@ -100,7 +104,8 @@ number_max_relax 100 ! max. number of the atom relaxation
 mass_scale 0 ! 0: do nothing or 1: rescale the atomic masses to that of C
 max_displacement 0.25 ! max. displacement of atoms in Bohr
 
-unit_time 1 ! unit of the time step; 1: fs or 2: Hartree a.u.
+unit_time 1 ! unit of the time step
+            ! 1: fs or 2: Hartree a.u.
 time_step 1.0 ! time step
 
 external_stress_v 0.0 0.0 0.0 ! external pressure in GPa
@@ -109,24 +114,25 @@ th_force 5d-5 ! convergence threshold for the force in Hartree a.u.
 th_stress 5d-7 ! convergence threshold for the stress in Hartree a.u.
 
 force_field 1 ! force field
-              ! 1: Stillinger-Weber for Si, 3: ZRL for Si-O-N-H, or 
-              ! 4: ADP for Nd-Fe-B
+              ! 1: Stillinger-Weber for Si, 2: Tsuneyuki potential for SiO2,
+              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, or 5: Jmatgen
 ~~~
 
 ### Sample 3: variable-cell relaxation by the RFC5 method
 
-The original RFC5 method relaxes the cell and atoms simultaneously. Within the 
-implementation in **soiap**, the cell and atoms are relaxed simultaneously only 
-at the first atom-relaxation iteration of each cell-relaxation loop. 
+The original RFC5 method relaxes the cell and atoms simultaneously. Within the
+implementation in **soiap**, the cell and atoms are relaxed simultaneously only
+at the first atom-relaxation iteration of each cell-relaxation loop.
 Therefore, if you want to performe a variable-cell relaxation as is the original
-RFC5 method, `number_max_relax` should be set to one. The cell and atoms are 
+RFC5 method, `number_max_relax` should be set to one. The cell and atoms are
 then relaxed simultaneously in all the iterations. See FAQ for details.
 
 ~~~
 crystal initial.cif ! CIF file for the initial structure
 symmetry 1 ! 0: not symmetrize displacements of the atoms or 1: symmetrize
 
-md_mode_cell 3 ! cell-relaxation method; 0: FIRE, 2: quenched MD, or 3: RFC5
+md_mode_cell 3 ! cell-relaxation method
+               ! 0: FIRE, 2: quenched MD, or 3: RFC5
 number_max_relax_cell 100 ! max. number of the cell relaxation
 number_max_relax 1 ! max. number of the atom relaxation
 max_displacement 0.1 ! max. displacement of atoms in Bohr
@@ -137,23 +143,24 @@ th_force 5d-5 ! convergence threshold for the force in Hartree a.u.
 th_stress 5d-7 ! convergence threshold for the stress in Hartree a.u.
 
 force_field 1 ! force field
-              ! 1: Stillinger-Weber for Si, 3: ZRL for Si-O-N-H, or 
-              ! 4: ADP for Nd-Fe-B
+              ! 1: Stillinger-Weber for Si, 2: Tsuneyuki potential for SiO2,
+              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, or 5: Jmatgen
 ~~~
 
 ### Sample 4: fixed-cell relaxation by the RFC5 method
 
-Within the implementation of the RFC5 method in **soiap**, the cell and atoms 
-are relaxed simultaneously at the first atom-relaxation iteration of each cell-
-relaxation loop other than the first cell-relaxation iteration. Therefore, if 
-`number_max_relax_cell` is set to one, the cell is not relaxed. See FAQ for 
+Within the implementation of the RFC5 method in **soiap**, the cell and atoms
+are relaxed simultaneously at the first atom-relaxation iteration of each
+cell-relaxation loop other than the first cell-relaxation iteration. Therefore,
+if `number_max_relax_cell` is set to one, the cell is not relaxed. See FAQ for
 details.
 
 ~~~
 crystal initial.cif ! CIF file for the initial structure
 symmetry 0 ! 0: not symmetrize displacements of the atoms or 1: symmetrize
 
-md_mode_cell 3 ! cell-relaxation method; 0: FIRE, 2: quenched MD, or 3: RFC5
+md_mode_cell 3 ! cell-relaxation method
+               ! 0: FIRE, 2: quenched MD, or 3: RFC5
 number_max_relax_cell 1 ! max. number of the cell relaxation
 number_max_relax 100 ! max. number of the atom relaxation
 max_displacement 0.1 ! max. displacement of atoms in Bohr
@@ -164,8 +171,8 @@ th_force 5d-5 ! convergence threshold for the force in Hartree a.u.
 th_stress 5d-7 ! convergence threshold for the stress in Hartree a.u.
 
 force_field 1 ! force field
-              ! 1: Stillinger-Weber for Si, 3: ZRL for Si-O-N-H, or 
-              ! 4: ADP for Nd-Fe-B
+              ! 1: Stillinger-Weber for Si, 2: Tsuneyuki potential for SiO2,
+              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, or 5: Jmatgen
 ~~~
 
 Output files
@@ -185,17 +192,17 @@ There are four output files:
 `log.strs`
 :   Stress tensors in Hartree a.u.
 
-In these files, `loopc` and `loopa` indicate the iteration numbers of cell and 
+In these files, `loopc` and `loopa` indicate the iteration numbers of cell and
 atom relaxation, respectively.
 
-You can check convergence of a calculation in the standard output. The line 
-starting with `QMD%frc converged.` means that the atom-relaxation iteration is 
-converged, and the line starting with `QMD%strs converged.` means that the cell-
-relaxation iteration is converged. If both iterations are converged, these two 
-lines are written consecutively, and they are followed by three lines starting 
-with `*** QMD%loopc =`, `tote,fmax,tote/natom,omega,omega/natom=`, and 
-`!!!! normally end !!!!`. Summarizing the above, when both the cell- and atom-
-relaxation iterations are converged, the standard output ends with, e.g., 
+You can check convergence of a calculation in the standard output. The line
+starting with `QMD%frc converged.` means that the atom-relaxation iteration is
+converged, and the line starting with `QMD%strs converged.` means that the
+cell-relaxation iteration is converged. If both iterations are converged, these
+two lines are written consecutively, and they are followed by three lines
+starting with `*** QMD%loopc =`, `tote,fmax,tote/natom,omega,omega/natom=`, and
+`!!!! normally end !!!!`. Summarizing the above, when both the cell- and
+atom-relaxation iterations are converged, the standard output ends with, e.g.
 
 ~~~
 ...
@@ -216,20 +223,20 @@ FAQ
 
 ### Which relaxation method should I use?
 
-The RFC5 method is fastest, although it sometimes fails to converge. The 
+The RFC5 method is fastest, although it sometimes fails to converge. The
 quenched MD method is slower but safer than the RFC5 method.
 
 ### How large is the value of `mass_cell`?
 
-Typically, the order of 1% of $M / \Omega_0^{1/3}$ is recommended, where $M$ is the 
-total atomic mass per cell and $\Omega_0$ is the initial volume per cell. If 
-`mass_cell` is too small, the structure usually results in isolated atoms and 
-clusters. If `mass_cell` is too large, it takes long time to be converged.
+Typically, the order of 1% of $M / \Omega_0^{1/3}$ is recommended, where $M$ is
+the total atomic mass per cell and $\Omega_0$ is the initial volume per cell.
+If `mass_cell` is too small, the structure usually results in isolated atoms
+and clusters. If `mass_cell` is too large, it takes long time to be converged.
 
 ### How can I perform a non-relaxation calculation?
 
-If both `number_max_relax_cell` and `number_max_relax` are set to one, the cell 
-and atoms are not relaxed. Quantities only of the initial structure are 
+If both `number_max_relax_cell` and `number_max_relax` are set to one, the cell
+and atoms are not relaxed. Quantities only of the initial structure are
 outputted. See the next topic for details.
 
 ### When does **soiap** relax the cell and atoms?
