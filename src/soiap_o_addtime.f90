@@ -122,7 +122,7 @@ contains
     if (QMD%ifrcf==1) then ! Stillinger-Weber for Si
        call Stillinger_Weber
     elseif (QMD%ifrcf==2) then ! Tsuneyuki potential for Si-O
-       stop 'Tsuneyuki potential is under debug'
+       !stop 'Tsuneyuki potential is under debug'
        call Tsuneyuki
     elseif (QMD%ifrcf==3) then ! ZRL potential for Si-O
        call ZRL

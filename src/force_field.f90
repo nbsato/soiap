@@ -291,22 +291,24 @@ subroutine Tsuneyuki
 
   integer :: i,j,k
   real*8 :: tote2,frc2(3,QMD%natom),strs2(3,3)
+  real*8 :: toteEwald,frcEwald(3,QMD%natom),strsEwald(3,3)
   real*8 :: rri(3),rrj(3)
   real*8 :: rrij(3),raij(3),dij
   real*8 :: toteij,frcijr,vtmp(3)
-  real*8 :: sigma,eps,e1,e2,e3,vol,rho,faemp
-  parameter (sigma=3.959164919d0) ! in Bohr
-  parameter (eps=7.968005097d-2) ! In Hartree
+  real*8 :: toteijEwald,frcijEwald(3),strsijEwald(3,3)
+  !real*8 :: sigma,eps,e1,e2,e3,vol,rho,faemp
+  !parameter (sigma=3.959164919d0) ! in Bohr
+  !parameter (eps=7.968005097d-2) ! In Hartree
 
   tote2=0.d0
   frc2=0.d0
   strs2=0.d0
-!$omp parallel do private(rri,rrj,rrij,raij,dij,frcijr,vtmp,frc2), reduction(+:tote2,strs2) ,  schedule(dynamic,2)
+!$omp parallel do private(rri,rrj,rrij,raij,dij,frcijr,vtmp,j,k), reduction(+:tote2,frc2,strs2) ,  schedule(dynamic,2)
   do i=1,QMD%natom-1
      if (QMD%zatm(i)/=8.and.QMD%zatm(i)/=14) stop 'Tsuneyuki: zatm(i) error'
   do j=i+1,QMD%natom
      if (QMD%zatm(j)/=8.and.QMD%zatm(j)/=14) stop 'Tsuneyuki: zatm(j) error'
-     if (QMD%zatm(j)==14.and.QMD%zatm(j)==14) cycle
+     if (QMD%zatm(i)==14.and.QMD%zatm(j)==14) cycle
      rri=QMD%rr(:,i)
      rrj=QMD%rr(:,j)
 !     call frac_diff_min(rri,rrj,rrij) ! rrij = rri - rrj
@@ -324,10 +326,30 @@ subroutine Tsuneyuki
   enddo ! j
   enddo ! i
 
+  toteEwald=0.d0
+  frcEwald=0.d0
+  strsEwald=0.d0
+!$omp parallel do private(rri,rrj,rrij,raij,toteijEwald,frcijEwald,strsijEwald,j), reduction(+:toteEwald,frcEwald,strsEwald) ,  schedule(dynamic,2)
+  do i=1,QMD%natom
+     if (QMD%zatm(i)/=8.and.QMD%zatm(i)/=14) stop 'Tsuneyuki: zatm(i) error'
+  do j=1,QMD%natom
+     if (QMD%zatm(j)/=8.and.QMD%zatm(j)/=14) stop 'Tsuneyuki: zatm(j) error'
+     if (QMD%zatm(i)==14.and.QMD%zatm(j)==14) cycle
+     rri=QMD%rr(:,i)
+     rrj=QMD%rr(:,j)
+     rrij=rrj-rri
+     raij=matmul(QMD%uv,rrij)
+     call Tsuneyuki_Ewald(QMD%zatm(i),QMD%zatm(j),raij,toteijEwald,frcijEwald,strsijEwald)
+     toteEwald=toteEwald+0.5d0*toteijEwald
+     frcEwald(:,i)=frcEwald(:,i)-frcijEwald
+     strsEwald=strsEwald+0.5d0*strsijEwald
+  enddo ! j
+  enddo ! i
+
 ! total
-  QMD%tote=tote2
-  QMD%frc=frc2
-  QMD%strs=strs2/QMD%omega
+  QMD%tote=tote2+toteEwald
+  QMD%frc=frc2+frcEwald
+  QMD%strs=(strs2+strsEwald)/QMD%omega
 
 !  write(*,*)'frc'
 !  do i=1,QMD%natom
@@ -393,10 +415,12 @@ subroutine Tsuneyuki_Uij(zatmi,zatmj,r,tote2,frc2r)
      Uij2=Uij2/kcalpermol
      dUij2=dUij2*bohr/kcalpermol
 
-! Coulomb part: atomic units
-     UijCoul=qti*qtj*(1.d0-gij)/r+qi*qj*gij/r
-     dUijCoul=-qti*qtj*(1.d0-gij)/(r**2)-qti*qtj*dgij/r &
-              -qi*qj*gij/(r**2)+qi*qj*dgij/r
+! Coulomb(short) part: atomic units
+!     UijCoul=qti*qtj*(1.d0-gij)/r+qi*qj*gij/r
+!     dUijCoul=-qti*qtj*(1.d0-gij)/(r**2)-qti*qtj*dgij/r &
+!              -qi*qj*gij/(r**2)+qi*qj*dgij/r
+     UijCoul=-qti*qtj*gij/r+qi*qj*gij/r
+     dUijCoul=qti*qtj*gij/(r**2)-qti*qtj*dgij/r-qi*qj*gij/(r**2)+qi*qj*dgij/r
 !
      Uij=UijCoul+Uij2
 !!     Uij=UijCoul
@@ -407,6 +431,43 @@ subroutine Tsuneyuki_Uij(zatmi,zatmj,r,tote2,frc2r)
 !  endif
   return
 end subroutine Tsuneyuki_Uij
+
+subroutine Tsuneyuki_Ewald(zatmi,zatmj,rij,toteEwald,frcEwald,strsEwald)
+  use ewald_module, only: M_PI, calcPotentialEwald, calcForceEwald, calcStressEwald
+  implicit none
+  integer,intent(in):: zatmi,zatmj
+  real*8,intent(in):: rij(3)
+  real*8,intent(out):: toteEwald,frcEwald(3),strsEwald(3,3)
+  logical:: lpair
+!
+  real*8 ai,aj,bi,bj,ci,cj,qi,qti,qj,qtj
+!=======================================================================
+  lpair=.false.
+  if ((zatmi.eq.8.and.zatmj.eq.14).or.(zatmi.eq.14.and.zatmj.eq.8)) then
+    lpair=.true.
+  endif
+  if (zatmi.eq.8.and.zatmj.eq.8) then
+    lpair=.true.
+  endif
+
+  if (.not.lpair) then
+    toteEwald=0.d0
+    frcEwald=0.d0
+    return
+  endif
+
+  call Tsuneyuki_Param(zatmi,ai,bi,ci,qi,qti)
+  call Tsuneyuki_Param(zatmj,aj,bj,cj,qj,qtj)
+
+! Coulomb(long) part: atomic units
+  call calcPotentialEwald(toteEwald,rij,QMD%uv,2.0d0*M_PI*QMD%bv,QMD%omega)
+  call calcForceEwald(frcEwald,rij,QMD%uv,2.0d0*M_PI*QMD%bv,QMD%omega)
+  call calcStressEwald(strsEwald,rij,QMD%uv,2.0d0*M_PI*QMD%bv,QMD%omega)
+  toteEwald=qti*qtj*toteEwald
+  frcEwald=-qti*qtj*frcEwald
+  strsEwald=qti*qtj*strsEwald
+  return
+end subroutine Tsuneyuki_Ewald
 
 subroutine Tsuneyuki_Param(z,a,b,c,q,qt)
   implicit none
