@@ -3,7 +3,8 @@ FFLAGS = -O2 -cpp -g -fbacktrace
 FFLAGS_fixed = $(FFLAGS) -ffixed-line-length-132
 FFLAGS_free = $(FFLAGS) -ffree-line-length-256
 LIBS = -llapack
-JMATGEN_ROOT = /path/to/jmatgen/root/directory
+
+# JMATGEN_ROOT = /path/to/jmatgen/root/directory
 
 # FC = ifort -qopenmp
 # FFLAGS = -O2 -cpp -g -traceback

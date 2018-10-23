@@ -1,3 +1,4 @@
 src/*.o
 src/*.mod
+src/*.a
 src/soiap

@@ -1,10 +1,14 @@
 .SUFFIXES:
-.SUFFIXES: .F .f90 .f .o
+.SUFFIXES: .F .f90 .f .o .a
 
 include make.inc
 
-LIBS_jmatgen = $(JMATGEN_ROOT)/src/libjmatgen.a
-FFLAGS_jmatgen = -I$(JMATGEN_ROOT)/src
+ifneq ($(JMATGEN_ROOT),)
+    LIBS_jmatgen = $(JMATGEN_ROOT)/src/libjmatgen.a
+    FFLAGS_jmatgen = -I$(JMATGEN_ROOT)/src
+else
+    LIBS_jmatgen = libjmatgen_dummy.a
+endif
 
 OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o rfc5.o cif.o soiap_o_addtime.o adp_base_module.o adp_kwu14_module.o periodic_lattice_module.o ewald.o
 
@@ -15,20 +19,23 @@ OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show
 
 all: soiap
 
-soiap: $(OBJS_o)
-	$(FC) -o $@ $^ $(LIBS_jmatgen) $(LIBS)
+soiap: $(OBJS_o) $(LIBS_jmatgen)
+	$(FC) -o $@ $^ $(LIBS)
 
 atomrelax_o.o: parms_o.o cif.o
 
 force_field.o: parms_o.o algebra.o adp_kwu14_module.o periodic_lattice_module.o ewald.o $(LIBS_jmatgen)
 
-input.o: keyvalue.o parms_o.o cif.o
+input.o: keyvalue.o parms_o.o cif.o $(LIBS_jmatgen)
 
 structure_opt.o: parms_o.o
 
 adp_base_module.o: periodic_lattice_module.o
 
 adp_kwu14_module.o: adp_base_module.o
+
+libjmatgen_dummy.a: jmatgen_dummy.o
+	ar -r -v $@ $^
 
 clean:
 	rm -f *.o *.mod
