@@ -3,11 +3,11 @@
 
 include make.inc
 
-ifneq ($(JMATGEN_ROOT),)
+ifeq ($(JMATGEN_ROOT),)
+    LIBS_jmatgen = libjmatgen_dummy.a
+else
     LIBS_jmatgen = $(JMATGEN_ROOT)/src/libjmatgen.a
     FFLAGS_jmatgen = -I$(JMATGEN_ROOT)/src
-else
-    LIBS_jmatgen = libjmatgen_dummy.a
 endif
 
 OBJS_o = algebra.o atomrelax_o.o input.o force_field.o keyvalue.o parms_o.o show_time.o structure_opt.o rfc5.o cif.o soiap_o_addtime.o adp_base_module.o adp_kwu14_module.o periodic_lattice_module.o ewald.o
@@ -38,7 +38,7 @@ libjmatgen_dummy.a: jmatgen_dummy.o
 	ar -r -v $@ $^
 
 clean:
-	rm -f *.o *.mod
+	rm -f *.o *.mod *.a
 
 cleanprog:
 	rm -f soiap
