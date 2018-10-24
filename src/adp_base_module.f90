@@ -48,23 +48,22 @@ module adp_base_module
     procedure, non_overridable, public :: energy
     procedure, non_overridable, public :: force
     procedure, non_overridable, public :: stress
+    procedure, non_overridable, public :: phi_force
+    procedure, non_overridable, public :: psi_force
 
-    procedure(cutoff_interface), deferred :: cutoff ! cutoff of interaction
-    procedure(phi_interface), deferred :: phi
-    procedure(phi_interface), deferred :: phi_derivative
-    procedure(f_interface), deferred :: f
-    procedure(f_interface), deferred :: f_derivative
-    procedure(rho_interface), deferred :: rho
-    procedure(rho_interface), deferred :: rho_derivative
-    procedure(u_interface), deferred :: u
-    procedure(u_interface), deferred :: u_derivative
-    procedure(w_interface), deferred :: w
-    procedure(w_interface), deferred :: w_derivative
+    procedure, nopass, non_overridable, public :: nu
 
-    procedure, non_overridable :: phi_force
-    procedure, non_overridable :: psi_force
-
-    procedure, nopass, non_overridable :: nu
+    procedure(cutoff_interface), deferred, public :: cutoff ! cutoff of interaction
+    procedure(phi_interface), deferred, public :: phi
+    procedure(phi_interface), deferred, public :: phi_derivative
+    procedure(f_interface), deferred, public :: f
+    procedure(f_interface), deferred, public :: f_derivative
+    procedure(rho_interface), deferred, public :: rho
+    procedure(rho_interface), deferred, public :: rho_derivative
+    procedure(u_interface), deferred, public :: u
+    procedure(u_interface), deferred, public :: u_derivative
+    procedure(w_interface), deferred, public :: w
+    procedure(w_interface), deferred, public :: w_derivative
 
   end type adp_base_type
 
