@@ -137,20 +137,20 @@ module adp_kwu14_module
 
     private
 
-    procedure :: cutoff
-    procedure :: phi
-    procedure :: phi_derivative
-    procedure :: rho
-    procedure :: rho_derivative
-    procedure :: f
-    procedure :: f_derivative
-    procedure :: u
-    procedure :: u_derivative
-    procedure :: w
-    procedure :: w_derivative
+    procedure, public :: cutoff
+    procedure, public :: phi
+    procedure, public :: phi_derivative
+    procedure, public :: rho
+    procedure, public :: rho_derivative
+    procedure, public :: f
+    procedure, public :: f_derivative
+    procedure, public :: u
+    procedure, public :: u_derivative
+    procedure, public :: w
+    procedure, public :: w_derivative
 
-    procedure, nopass :: psi
-    procedure, nopass :: psi_derivative
+    procedure, nopass, public :: psi
+    procedure, nopass, public :: psi_derivative
 
   end type adp_kwu14_type
 
