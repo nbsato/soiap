@@ -6,7 +6,7 @@ Structure Optimization with InterAtomic Potential
 Latest version
 --------------
 
-version 0.2.1, released on October 24th, 2018
+version 0.2.2, released on October 30th, 2018
 
 Requirement
 -----------
