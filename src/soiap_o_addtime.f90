@@ -130,6 +130,8 @@ contains
        call ADP_KWU14
     elseif (QMD%ifrcf==5) then ! Jmatgen potential
       call Jmatgen
+    elseif (QMD%ifrcf==6) then ! Lennard-Jones potential
+      call LennardJones
     else
        stop 'etot_frc_strs error'
     endif

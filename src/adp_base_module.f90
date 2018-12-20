@@ -151,7 +151,7 @@ contains
       stop 1
     end if
 
-    this%lattice%direct_lattice = real(a, krpl)
+    this%lattice%vector = real(a, krpl)
     this%z = z
     this%r_frac = r_frac
 
@@ -264,7 +264,7 @@ contains
           end if
 
           rj_frac = this%cell_of_replica(j, i)%list(:, jj) + rj_frac_reduced
-          rij = matmul(this%lattice%direct_lattice, rj_frac - this%r_frac(:, i))
+          rij = matmul(this%lattice%vector, rj_frac - this%r_frac(:, i))
           dij = norm(rij)
 
           e = e + 0.5_kr * this%phi(this%z(i), this%z(j), dij)
@@ -342,7 +342,7 @@ contains
           end if
 
           rj_frac = this%cell_of_replica(j, i)%list(:, jj) + rj_frac_reduced
-          rij = matmul(this%lattice%direct_lattice, rj_frac - this%r_frac(:, i))
+          rij = matmul(this%lattice%vector, rj_frac - this%r_frac(:, i))
 
           ! 1st term of the 1st eq. in Appendix
           f(:, i) = f(:, i) + this%phi_force(this%z(i), this%z(j), this%rhobar(i), this%rhobar(j), rij)
@@ -407,7 +407,7 @@ contains
           end if
 
           rj_frac = this%cell_of_replica(j, i)%list(:, jj) + rj_frac_reduced
-          rij = matmul(this%lattice%direct_lattice, rj_frac - this%r_frac(:, i))
+          rij = matmul(this%lattice%vector, rj_frac - this%r_frac(:, i))
 
           ! 1st term of the 1st eq. in Appendix
           f = this%phi_force(this%z(i), this%z(j), this%rhobar(i), this%rhobar(j), rij)

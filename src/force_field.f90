@@ -40,7 +40,7 @@ subroutine Stillinger_Weber
   parameter (sigma=3.959164919d0) ! in Bohr
   parameter (eps=7.968005097d-2) ! in Hartree
 
-  lattice%direct_lattice=real(QMD%uv,kr)
+  lattice%vector=real(QMD%uv,kr)
   allocate(cell_of_replica(QMD%natom,QMD%natom))
 
 ! two-body term
@@ -552,7 +552,7 @@ subroutine ZRL
   real*8 :: totep,frcp(3,QMD%natom),strsp(3,3),eci
   real*8 :: zi,ziz0i,fsz,dfszdz,ci1,ci2,dzi,ddzidzi
 
-  lattice%direct_lattice=real(QMD%uv,kr)
+  lattice%vector=real(QMD%uv,kr)
   allocate(cell_of_replica(QMD%natom,QMD%natom))
 
 !$omp parallel do private(j)
@@ -775,7 +775,7 @@ subroutine ZRL_bijij(i,j,shiftj,bijij,dbdri,dbdrj,dbdrk,dbdrk_raik)
    raij=matmul(QMD%uv,rrij) ! relative to Cartesian
    dij=sqrt(sum(raij**2)) ! bond length in Bohr
 
-   lattice%direct_lattice=real(QMD%uv,kr)
+   lattice%vector=real(QMD%uv,kr)
 
    do k=1,QMD%natom
       cell_of_replica=lattice%get_cell_of_replica(real(QMD%rr(:,k),kr),real(QMD%rr(:,i),kr),real(ZRL_sij(zi,QMD%zatm(k)),kr))
@@ -1319,7 +1319,8 @@ real(8) function ZRL_ci2(z)
   endif
   ZRL_ci2=ZRL_ci2/hartree ! eV to Hartree
 end function ZRL_ci2
-
+!--------1---------2---------3---------4---------5---------6---------7--
+!--------1---------2---------3---------4---------5---------6---------7--
 subroutine ADP_KWU14
   use adp_kwu14_module, only: adp_kwu14_parameter, adp_kwu14_type
   implicit none
@@ -1429,5 +1430,23 @@ contains
   end function getAtomicName
 
 end subroutine Jmatgen
+!--------1---------2---------3---------4---------5---------6---------7--
+!--------1---------2---------3---------4---------5---------6---------7--
+subroutine LennardJones
+
+  use lj_module, only: lj_type
+
+  implicit none
+
+  type(lj_type) :: pot
+
+  pot = lj_type(QMD%lj_parameter)
+  call pot%set_system(QMD%uv, QMD%zatm, QMD%rr)
+
+  QMD%tote = pot%energy()
+  QMD%frc = pot%force()
+  QMD%strs = pot%stress()
+
+end subroutine LennardJones
 
 end module
