@@ -25,7 +25,7 @@ program main
   integer:: loopa,loopc
   type(t_showtime)::  timer
 
-  write(*,*)'soiap version 0.2.2'
+  write(*,*)'soiap version 0.3.0'
   write(*,*)
 
   open(901,file='log.struc',form='formatted')
@@ -130,6 +130,8 @@ contains
        call ADP_KWU14
     elseif (QMD%ifrcf==5) then ! Jmatgen potential
       call Jmatgen
+    elseif (QMD%ifrcf==6) then ! Lennard-Jones potential
+      call LennardJones
     else
        stop 'etot_frc_strs error'
     endif

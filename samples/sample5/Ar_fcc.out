@@ -1,0 +1,520 @@
+ soiap version 0.3.0
+
+ input=./Ar_fcc.in
+ unit vectors [Bohr]
+u1 =    10.0155477394682926     0.0000000000000000     0.0000000000000000
+u2 =     0.0000000000000000    10.0155477394682926     0.0000000000000000
+u3 =     0.0000000000000000     0.0000000000000000    10.0155477394682926
+ QMD%omega =   1004.6715775649542     
+ number of atoms =           4
+ number of elements =           1
+ atom_list: lattice coordinate
+  18     0.0000000000000000     0.0000000000000000     0.0000000000000000   1
+  18     0.0000000000000000     0.5000000000000000     0.5000000000000000   1
+  18     0.5000000000000000     0.0000000000000000     0.5000000000000000   1
+  18     0.5000000000000000     0.5000000000000000     0.0100000000000000   1
+ atom_list: Cartesian coordinate [Bohr]
+  18     0.0000000000000000     0.0000000000000000     0.0000000000000000   1
+  18     0.0000000000000000     5.0077738697341463     5.0077738697341463   1
+  18     5.0077738697341463     0.0000000000000000     5.0077738697341463   1
+  18     5.0077738697341463     5.0077738697341463     0.1001554773946829   1
+ md_mode =           4
+ number_max_relax =         100
+ md_mode_cell =           2
+ number_max_relax_cell =         100
+external_stress_v    0.000000    0.000000    0.000000
+ time_step (input) =   1.0000000000000000     
+ time_step [a.u.] =   41.341374176780803     
+ th_force =   5.0000000000000002E-005
+ th_stress =   4.9999999999999998E-007
+ max_displacement [Bohr] =  0.25000000000000000     
+ mass_cell =   290.83100000000002     
+ force_field =           6
+ lj_z=          18
+ lj_epsilon=   3.7465570000000002E-004
+ lj_sigma=   6.5096319999999999     
+ lj_combination_rules=           1
+ QMD%loopc,QMD%loopa=           1           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1           2  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1           3  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1           4  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1           5  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1           6  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1           7  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1           8  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1           9  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          10  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          11  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          12  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          13  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          14  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          15  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          16  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          17  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          18  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          19  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          20  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          21  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          22  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          23  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          24  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          25  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          26  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          27  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          28  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          29  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          30  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          31  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          32  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          33  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          34  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          35  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          36  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          37  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          38  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          39  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          40  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          41  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          42  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          43  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          44  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          45  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          46  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          47  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          48  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          49  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          50  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          51  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          52  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          53  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          54  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          55  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          56  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          57  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          58  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          59  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          60  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          61  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          62  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          63  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          64  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          65  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          66  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          67  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          68  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          69  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          70  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          71  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          72  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          73  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          74  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          75  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          76  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          77  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          78  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          79  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          80  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          81  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          82  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          83  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          84  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          85  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          86  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          87  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          88  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          89  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          90  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          91  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          92  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          93  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          94  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          95  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           1          96  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          97  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          98  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1          99  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           1         100  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%omega =   1004.6774331364339     
+ QMD%loopc,QMD%loopa=           2           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2           2  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2           3  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2           4  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2           5  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2           6  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2           7  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2           8  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2           9  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          10  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          11  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          12  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          13  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          14  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          15  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          16  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          17  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          18  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          19  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          20  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          21  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          22  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          23  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          24  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          25  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          26  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          27  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          28  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          29  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          30  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          31  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          32  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          33  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          34  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          35  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          36  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          37  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          38  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          39  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          40  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          41  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          42  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          43  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          44  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          45  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          46  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          47  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          48  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          49  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          50  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          51  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          52  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          53  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          54  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          55  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          56  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          57  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          58  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          59  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          60  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          61  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          62  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          63  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          64  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          65  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          66  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          67  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          68  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          69  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          70  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          71  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          72  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          73  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          74  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          75  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          76  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          77  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          78  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          79  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          80  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          81  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          82  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          83  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          84  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          85  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          86  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          87  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+ QMD%loopc,QMD%loopa=           2          88  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+ QMD%loopc,QMD%loopa=           2          89  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    2   89  0.4988E-04
+ QMD%omega =   1004.6946535059309     
+ QMD%loopc,QMD%loopa=           3           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    3    1  0.4987E-04
+ QMD%omega =   1004.7232065724319     
+ QMD%loopc,QMD%loopa=           4           1  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    4    1  0.4986E-04
+ QMD%omega =   1004.7630391161575     
+ QMD%loopc,QMD%loopa=           5           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    5    1  0.4985E-04
+ QMD%omega =   1004.8140769079195     
+ QMD%loopc,QMD%loopa=           6           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    6    1  0.4984E-04
+ QMD%omega =   1004.8762248615373     
+ QMD%loopc,QMD%loopa=           7           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    7    1  0.4982E-04
+ QMD%omega =   1004.9493672288977     
+ QMD%loopc,QMD%loopa=           8           1  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    8    1  0.4980E-04
+ QMD%omega =   1005.0333678371195     
+ QMD%loopc,QMD%loopa=           9           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax    9    1  0.4978E-04
+ QMD%omega =   1005.1280703671708     
+ QMD%loopc,QMD%loopa=          10           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   10    1  0.4975E-04
+ QMD%omega =   1005.2332986731831     
+ QMD%loopc,QMD%loopa=          11           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   11    1  0.4972E-04
+ QMD%omega =   1005.3488571415900     
+ QMD%loopc,QMD%loopa=          12           1  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   12    1  0.4969E-04
+ QMD%omega =   1005.4745310891240     
+ QMD%loopc,QMD%loopa=          13           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   13    1  0.4965E-04
+ QMD%omega =   1005.6100871985983     
+ QMD%loopc,QMD%loopa=          14           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   14    1  0.4962E-04
+ QMD%omega =   1005.7552739913145     
+ QMD%loopc,QMD%loopa=          15           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   15    1  0.4958E-04
+ QMD%omega =   1005.9098223348424     
+ QMD%loopc,QMD%loopa=          16           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   16    1  0.4953E-04
+ QMD%omega =   1006.0734459848371     
+ QMD%loopc,QMD%loopa=          17           1  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   17    1  0.4949E-04
+ QMD%omega =   1006.2458421594860     
+ QMD%loopc,QMD%loopa=          18           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   18    1  0.4944E-04
+ QMD%omega =   1006.4266921450968     
+ QMD%loopc,QMD%loopa=          19           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   19    1  0.4939E-04
+ QMD%omega =   1006.6156619312864     
+ QMD%loopc,QMD%loopa=          20           1  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   20    1  0.4934E-04
+ QMD%omega =   1006.8124028741581     
+ QMD%loopc,QMD%loopa=          21           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   21    1  0.4929E-04
+ QMD%omega =   1007.0165523858146     
+ QMD%loopc,QMD%loopa=          22           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   22    1  0.4923E-04
+ QMD%omega =   1007.2277346485023     
+ QMD%loopc,QMD%loopa=          23           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   23    1  0.4917E-04
+ QMD%omega =   1007.4455613516445     
+ QMD%loopc,QMD%loopa=          24           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   24    1  0.4911E-04
+ QMD%omega =   1007.6696324499942     
+ QMD%loopc,QMD%loopa=          25           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   25    1  0.4905E-04
+ QMD%omega =   1007.8995369411020     
+ QMD%loopc,QMD%loopa=          26           1  out of          100         100
+show_time: tote_frc_strs:     0.004 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   26    1  0.4899E-04
+ QMD%omega =   1008.1348536602890     
+ QMD%loopc,QMD%loopa=          27           1  out of          100         100
+show_time: tote_frc_strs:     0.005 sec
+QMD%frc converged. QMD%loopc, QMD%loopa, QMD%fmax   27    1  0.4893E-04
+QMD%strs converged. QMD%loopc, QMD%smax   27  0.4818E-06
+ *** QMD%loopc =          27
+tote,fmax,tote/natom,omega,omega/natom=       -0.0129027081        0.0000489258       -0.0032256770      149.3902046798       37.3475511699
+ !!!! normally end !!!!

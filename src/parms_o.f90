@@ -16,6 +16,8 @@
 
 module paramlist
 
+  use lj_module, only: lj_parameter_type
+
   real*8 :: bohr,kcalpermol,hartree,tol
   parameter (bohr=0.529177249d0, kcalpermol=627.503d0, hartree=27.2116d0)
   parameter (tol=1.d-12)
@@ -32,6 +34,8 @@ type t_qmd
   integer,allocatable :: iposfix(:),zatm(:)
   real*8,allocatable :: ra(:,:),rr(:,:),mass(:),mfac(:)
   real*8,allocatable :: frc(:,:),vrr(:,:)
+
+  type(lj_parameter_type) :: lj_parameter
 
 ! lattice_fire
   integer :: fire_nminc ! for FIRE

@@ -26,6 +26,11 @@ subroutine input
   use keyvalue
   use paramlist
   use cif_module
+  use lj_module, only: &
+      & lj_parameter_type, &
+      & make_parameter_lorentz_berthelot, &
+      & make_parameter_kong, &
+      & make_parameter_waldman_hagler
   use m_jmatgen, only: initJmatgen
 
   implicit none
@@ -216,14 +221,36 @@ subroutine input
   call getkeyvalue(inputfilename,"force_field",QMD%ifrcf,default=0)
   write(*,*)'force_field =',QMD%ifrcf
 
-! Jmatgen
-  if (QMD%ifrcf==5) then
-    call getkeyvalue(inputfilename,"config_jmatgen_energy",config_jmatgen_energy)
-    call getkeyvalue(inputfilename,"config_jmatgen_force",config_jmatgen_force,default="")
-    write(*,*)'config_jmatgen_energy=',trim(config_jmatgen_energy)
-    write(*,*)'config_jmatgen_force=',trim(config_jmatgen_force)
-    call initJmatgen(config_jmatgen_energy,config_jmatgen_force)
-  endif
+  select case (QMD%ifrcf)
+    case (5) ! Jmatgen
+      call getkeyvalue(inputfilename,"config_jmatgen_energy",config_jmatgen_energy)
+      call getkeyvalue(inputfilename,"config_jmatgen_force",config_jmatgen_force,default="")
+      write(*,*)'config_jmatgen_energy=',trim(config_jmatgen_energy)
+      write(*,*)'config_jmatgen_force=',trim(config_jmatgen_force)
+      call initJmatgen(config_jmatgen_energy,config_jmatgen_force)
+    case (6) ! Lennard-Jones potential
+      allocate(QMD%lj_parameter%z(QMD%nkatm))
+      call getkeyvalue(inputfilename,"lj_z",QMD%lj_parameter%z(:),size(QMD%lj_parameter%z))
+      write(*,*)'lj_z=',QMD%lj_parameter%z
+      allocate(QMD%lj_parameter%epsilon(QMD%nkatm, 1))
+      call getkeyvalue(inputfilename,"lj_epsilon",QMD%lj_parameter%epsilon(:, 1),size(QMD%lj_parameter%epsilon))
+      write(*,*)'lj_epsilon=',QMD%lj_parameter%epsilon
+      allocate(QMD%lj_parameter%sigma(QMD%nkatm, 1))
+      call getkeyvalue(inputfilename,"lj_sigma",QMD%lj_parameter%sigma(:, 1),size(QMD%lj_parameter%sigma))
+      write(*,*)'lj_sigma=',QMD%lj_parameter%sigma
+      call getkeyvalue(inputfilename,"lj_combination_rules",itmp)
+      write(*,*)'lj_combination_rules=',itmp
+      select case (itmp)
+        case (1)
+          QMD%lj_parameter=make_parameter_lorentz_berthelot(QMD%lj_parameter%z,QMD%lj_parameter%epsilon(:,1),QMD%lj_parameter%sigma(:,1))
+        case (2)
+          QMD%lj_parameter=make_parameter_kong(QMD%lj_parameter%z,QMD%lj_parameter%epsilon(:,1),QMD%lj_parameter%sigma(:,1))
+        case (3)
+          QMD%lj_parameter=make_parameter_waldman_hagler(QMD%lj_parameter%z,QMD%lj_parameter%epsilon(:,1),QMD%lj_parameter%sigma(:,1))
+        case default
+          stop 'invalid lj_combination_rule'
+      end select
+  end select
 
 end subroutine input      
 

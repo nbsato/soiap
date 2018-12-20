@@ -6,12 +6,16 @@ Structure Optimization with InterAtomic Potential
 Latest version
 --------------
 
-version 0.2.2, released on October 30th, 2018
+0.3.0, released on December 20th, 2018
+
+- Added the Lennard-Jones potential.
 
 Requirement
 -----------
 
-- Fortran compiler supporting the Fortran 2003 standard
+- Fortran compiler
+  - Should support the Fortran 2003 standard.
+  - Should support `ERF` and `ERFC`, which are part of the Fortran 2008 standard.
 - LAPACK
 
 Usage
