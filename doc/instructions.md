@@ -84,7 +84,8 @@ th_stress 5d-7 ! convergence threshold for the stress in Hartree a.u.
 
 force_field 1 ! force field
               ! 1: Stillinger-Weber for Si, 2: Tsuneyuki potential for SiO2,
-              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, or 5: Jmatgen
+              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, 5: Jmatgen, or
+              ! 6: Lennard-Jones
 ~~~
 
 ### Sample 2: initial structure given by a CIF file
@@ -115,7 +116,8 @@ th_stress 5d-7 ! convergence threshold for the stress in Hartree a.u.
 
 force_field 1 ! force field
               ! 1: Stillinger-Weber for Si, 2: Tsuneyuki potential for SiO2,
-              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, or 5: Jmatgen
+              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, 5: Jmatgen, or
+              ! 6: Lennard-Jones
 ~~~
 
 ### Sample 3: variable-cell relaxation by the RFC5 method
@@ -144,7 +146,8 @@ th_stress 5d-7 ! convergence threshold for the stress in Hartree a.u.
 
 force_field 1 ! force field
               ! 1: Stillinger-Weber for Si, 2: Tsuneyuki potential for SiO2,
-              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, or 5: Jmatgen
+              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, 5: Jmatgen, or
+              ! 6: Lennard-Jones
 ~~~
 
 ### Sample 4: fixed-cell relaxation by the RFC5 method
@@ -172,7 +175,8 @@ th_stress 5d-7 ! convergence threshold for the stress in Hartree a.u.
 
 force_field 1 ! force field
               ! 1: Stillinger-Weber for Si, 2: Tsuneyuki potential for SiO2,
-              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, or 5: Jmatgen
+              ! 3: ZRL for Si-O-N-H, 4: ADP for Nd-Fe-B, 5: Jmatgen, or
+              ! 6: Lennard-Jones
 ~~~
 
 Output files

@@ -26,14 +26,14 @@ module periodic_lattice_module
 
     private
 
-    real(kr), public :: direct_lattice(3, 3) ! direct lattice vectors as column vectors
+    real(kr), public :: vector(3, 3) ! lattice vectors as column vectors
 
   contains
 
     private
 
     procedure, public :: volume
-    procedure, public :: reciprocal_lattice
+    procedure, public :: reciprocal
     procedure, public :: get_cell_of_replica
 
   end type periodic_lattice_type
@@ -54,24 +54,27 @@ contains
 
     class(periodic_lattice_type), intent(in) :: this
 
-    volume = dot_product(cross_product(this%direct_lattice(:, 1), this%direct_lattice(:, 2)), this%direct_lattice(:, 3))
+    volume = dot_product(cross_product(this%vector(:, 1), this%vector(:, 2)), this%vector(:, 3))
 
   end function volume
 
-  pure function reciprocal_lattice(this)
+  pure type(periodic_lattice_type) function reciprocal(this)
 
     implicit none
 
     class(periodic_lattice_type), intent(in) :: this
-    real(kr) :: reciprocal_lattice(3, 3)
+
+    real(kr) :: vector(3, 3)
 
     ! without 2 pi
-    reciprocal_lattice(:, 1) = cross_product(this%direct_lattice(:, 2), this%direct_lattice(:, 3))
-    reciprocal_lattice(:, 2) = cross_product(this%direct_lattice(:, 3), this%direct_lattice(:, 1))
-    reciprocal_lattice(:, 3) = cross_product(this%direct_lattice(:, 1), this%direct_lattice(:, 2))
-    reciprocal_lattice = reciprocal_lattice / this%volume()
+    vector(:, 1) = cross_product(this%vector(:, 2), this%vector(:, 3))
+    vector(:, 2) = cross_product(this%vector(:, 3), this%vector(:, 1))
+    vector(:, 3) = cross_product(this%vector(:, 1), this%vector(:, 2))
+    vector = vector / this%volume()
 
-  end function reciprocal_lattice
+    reciprocal%vector = vector
+
+  end function reciprocal
 
   type(cell_list_type) function get_cell_of_replica(this, r_frac, origin_frac, cutoff) result(cell_of_replica)
 
@@ -84,7 +87,7 @@ contains
     real(kr), intent(in) :: origin_frac(3) ! origin of a searched region in fractional coords.
     real(kr), intent(in) :: cutoff ! cutoff of a searched region
 
-    real(kr) :: b(3, 3)
+    type(periodic_lattice_type) :: reciprocal
     real(kr) :: cutoff_cell(3)
     integer :: cell_min(3)
     integer :: cell_max(3)
@@ -100,10 +103,10 @@ contains
     integer :: n3
 
     ! 1/8 size of a supercell circumscribing a sphere of radius 'r_cut'
-    b = this%reciprocal_lattice()
-    cutoff_cell(1) = norm(b(:, 1)) * cutoff
-    cutoff_cell(2) = norm(b(:, 2)) * cutoff
-    cutoff_cell(3) = norm(b(:, 3)) * cutoff
+    reciprocal = this%reciprocal()
+    cutoff_cell(1) = norm(reciprocal%vector(:, 1)) * cutoff
+    cutoff_cell(2) = norm(reciprocal%vector(:, 2)) * cutoff
+    cutoff_cell(3) = norm(reciprocal%vector(:, 3)) * cutoff
 
     if (any(exceed_integer(origin_frac - cutoff_cell)) &
         & .or. any(exceed_integer(origin_frac + cutoff_cell))) then
@@ -114,7 +117,7 @@ contains
     cell_max = floor(origin_frac + cutoff_cell)
 
     r_frac_reduced = modulo(r_frac, 1._kr)
-    origin = matmul(this%direct_lattice, origin_frac)
+    origin = matmul(this%vector, origin_frac)
 
     allocate(cell_of_replica%list(3, product(cell_max - cell_min + 1)))
     num_replica = 0
@@ -127,7 +130,7 @@ contains
           cell(1) = n1
 
           r_replica_frac = cell + r_frac_reduced
-          r_replica = matmul(this%direct_lattice, r_replica_frac)
+          r_replica = matmul(this%vector, r_replica_frac)
           d = norm(r_replica - origin)
           if (d > cutoff) then
             cycle
